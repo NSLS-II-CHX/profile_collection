@@ -159,9 +159,13 @@ class EigerBase(AreaDetector):
         '''
         if streaming:
             key = self._image_name  # this comes from the SingleTrigger mixin
-            return {key: super().read()[key]}
+            ret = {key: super().read()[key]}
+            print("streaming read : {}".format(ret))
+            return ret
         else:
-            return super().read()
+            ret = super().read()
+            print("Non-sreaming read : {}".format(ret))
+            return ret
 
 
 
