@@ -233,7 +233,7 @@ specpath = os.path.expanduser('/home/xf11id/specfiles/chx_spec_2017_11_28.spec')
 spec_cb = DocumentToSpec(specpath)
 
 
-RE.subscribe(spec_cb)
+#RE.subscribe(spec_cb)
  
 
 def reload_macro(filename):

@@ -149,23 +149,6 @@ class EigerBase(AreaDetector):
     def hints(self):
         return {'fields': [self.stats1.total.name]}
 
-    def read(streaming=False):
-        '''
-            This is a test of using streaming read.
-            Ideally, this should be handled by a new _stream_attrs property.
-            For now, we just check for a streaming key in read and
-            call super() if False, or read the one key we know we should read
-            if True.
-        '''
-        if streaming:
-            key = self._image_name  # this comes from the SingleTrigger mixin
-            ret = {key: super().read()[key]}
-            print("streaming read : {}".format(ret))
-            return ret
-        else:
-            ret = super().read()
-            print("Non-sreaming read : {}".format(ret))
-            return ret
 
 
 
@@ -180,6 +163,50 @@ class EigerSingleTrigger(SingleTrigger, EigerBase):
         status = super().trigger()
         set_and_wait(self.special_trigger_button, 1)
         return status
+
+    def read(self, streaming=False):
+        '''
+            This is a test of using streaming read.
+            Ideally, this should be handled by a new _stream_attrs property.
+            For now, we just check for a streaming key in read and
+            call super() if False, or read the one key we know we should read
+            if True.
+        '''
+        #ret = super().read()
+        #print("super read() : {}".format(ret))
+        #return ret
+        if streaming:
+            key = self._image_name  # this comes from the SingleTrigger mixin
+            read_dict = super().read()
+            ret = {key: read_dict[key]}
+            print("streaming read : {}".format(ret))
+            return ret
+        else:
+            ret = super().read()
+            print("Non-streaming read : {}".format(ret))
+            return ret
+
+    def describe(self, streaming=False):
+        '''
+            This is a test of using streaming read.
+            Ideally, this should be handled by a new _stream_attrs property.
+            For now, we just check for a streaming key in read and
+            call super() if False, or read the one key we know we should read
+            if True.
+        '''
+        #ret = super().read()
+        #print("super read() : {}".format(ret))
+        #return ret
+        if streaming:
+            key = self._image_name  # this comes from the SingleTrigger mixin
+            read_dict = super().describe()
+            ret = {key: read_dict[key]}
+            print('describe streaming : {}'.format(ret))
+            return ret
+        else:
+            ret = super().describe()
+            print('describe : {}'.format(ret))
+            return ret
 
 
 class FastShutterTrigger(Device):
