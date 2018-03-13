@@ -16,6 +16,8 @@ from ophyd.utils import set_and_wait
 from pathlib import PurePath
 from bluesky.plan_stubs import stage, unstage, open_run, close_run, trigger_and_read, pause
 
+from collections import OrderedDict
+
 
 class TIFFPluginWithFileStore(TIFFPlugin, FileStoreTIFFIterativeWrite):
     """Add this as a component to detectors that write TIFFs."""
@@ -164,7 +166,7 @@ class EigerSingleTrigger(SingleTrigger, EigerBase):
         set_and_wait(self.special_trigger_button, 1)
         return status
 
-    def read(self, streaming=False):
+    def read(self, *args, streaming=False, **kwargs):
         '''
             This is a test of using streaming read.
             Ideally, this should be handled by a new _stream_attrs property.
@@ -178,15 +180,15 @@ class EigerSingleTrigger(SingleTrigger, EigerBase):
         if streaming:
             key = self._image_name  # this comes from the SingleTrigger mixin
             read_dict = super().read()
-            ret = {key: read_dict[key]}
+            ret = OrderedDict({key: read_dict[key]})
             print("streaming read : {}".format(ret))
             return ret
         else:
-            ret = super().read()
+            ret = super().read(*args, **kwargs)
             print("Non-streaming read : {}".format(ret))
             return ret
 
-    def describe(self, streaming=False):
+    def describe(self, *args, streaming=False, **kwargs):
         '''
             This is a test of using streaming read.
             Ideally, this should be handled by a new _stream_attrs property.
@@ -200,11 +202,11 @@ class EigerSingleTrigger(SingleTrigger, EigerBase):
         if streaming:
             key = self._image_name  # this comes from the SingleTrigger mixin
             read_dict = super().describe()
-            ret = {key: read_dict[key]}
+            ret = OrderedDict({key: read_dict[key]})
             print('describe streaming : {}'.format(ret))
             return ret
         else:
-            ret = super().describe()
+            ret = super().describe(*args, **kwargs)
             print('describe : {}'.format(ret))
             return ret
 
