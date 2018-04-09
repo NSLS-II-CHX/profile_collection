@@ -173,6 +173,11 @@ class EigerSingleTrigger(SingleTrigger, EigerBase):
             For now, we just check for a streaming key in read and
             call super() if False, or read the one key we know we should read
             if True.
+
+            Parameters
+            ----------
+            streaming : bool, optional
+                whether to read streaming attrs or not
         '''
         #ret = super().read()
         #print("super read() : {}".format(ret))
@@ -181,11 +186,9 @@ class EigerSingleTrigger(SingleTrigger, EigerBase):
             key = self._image_name  # this comes from the SingleTrigger mixin
             read_dict = super().read()
             ret = OrderedDict({key: read_dict[key]})
-            print("streaming read : {}".format(ret))
             return ret
         else:
             ret = super().read(*args, **kwargs)
-            print("Non-streaming read : {}".format(ret))
             return ret
 
     def describe(self, *args, streaming=False, **kwargs):
@@ -195,19 +198,19 @@ class EigerSingleTrigger(SingleTrigger, EigerBase):
             For now, we just check for a streaming key in read and
             call super() if False, or read the one key we know we should read
             if True.
+
+            Parameters
+            ----------
+            streaming : bool, optional
+                whether to read streaming attrs or not
         '''
-        #ret = super().read()
-        #print("super read() : {}".format(ret))
-        #return ret
         if streaming:
             key = self._image_name  # this comes from the SingleTrigger mixin
             read_dict = super().describe()
             ret = OrderedDict({key: read_dict[key]})
-            print('describe streaming : {}'.format(ret))
             return ret
         else:
             ret = super().describe(*args, **kwargs)
-            print('describe : {}'.format(ret))
             return ret
 
 
