@@ -78,7 +78,7 @@ class EigerSimulatedFilePlugin(Device, FileStoreBase):
         self.sequence_id_offset = 1
         # This is changed for when a datum is a slice
         self.resource_SPEC = "AD_EIGER2"
-        self.image_slice = None
+        self.frame_num = None
         super().__init__(*args, **kwargs)
         self._datum_kwargs_map = dict()  # store kwargs for each uid
 
@@ -103,8 +103,8 @@ class EigerSimulatedFilePlugin(Device, FileStoreBase):
         # signal and stash it in the datum.
         seq_id = int(self.sequence_id_offset) + int(self.sequence_id.get())  # det writes to the NEXT one
         datum_kwargs.update({'seq_id': seq_id})
-        if self.image_slice is not None:
-            datum_kwargs.update({'image_slice': self.image_slice})
+        if self.frame_num is not None:
+            datum_kwargs.update({'frame_num': self.frame_num})
         return super().generate_datum(key, timestamp, datum_kwargs)
 
 
@@ -258,7 +258,7 @@ class EigerManualTrigger(SingleTrigger, EigerBase):
         # this is because we write datum after image is acquired
         self.file.sequence_id_offset = 0
         self.file.resource_SPEC = "AD_EIGER_SLICE"
-        self.file.image_slice = 0
+        self.file.frame_num = 0
         # set up order
         self.stage_sigs = OrderedDict()
         self.stage_sigs['cam.image_mode'] = 1
@@ -273,7 +273,7 @@ class EigerManualTrigger(SingleTrigger, EigerBase):
         #self._acquisition_signal = self.special_trigger_button
 
     def stage(self):
-        self.file.image_slice = 0
+        self.file.frame_num = 0
         super().stage()
         # for some reason if doing this too fast in staging
         # this gets reset. so I do it here instead.
@@ -284,7 +284,7 @@ class EigerManualTrigger(SingleTrigger, EigerBase):
         time.sleep(1)
 
     def unstage(self):
-        self.file.image_slice = 0
+        self.file.frame_num = 0
         super().unstage()
         time.sleep(.1)
         self.cam.acquire.put(0)
@@ -317,7 +317,7 @@ class EigerManualTrigger(SingleTrigger, EigerBase):
         # then call trigger on the PV
         self.special_trigger_button.put(1, wait=False)
         self.dispatch(self._image_name, ttime.time())
-        self.file.image_slice += 1
+        self.file.frame_num += 1
 
         return st
 
