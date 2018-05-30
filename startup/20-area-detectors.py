@@ -92,7 +92,7 @@ class EigerSimulatedFilePlugin(Device, FileStoreBase):
 
         ipf = int(self.file_write_images_per_file.get())
         # logger.debug("Inserting resource with filename %s", fn)
-        self._resource = self._reg.register_resource(
+        self._resource_uid = self._reg.register_resource(
             self.resource_SPEC,
             str(self.reg_root), fn,
             {'images_per_file': ipf})
