@@ -138,8 +138,8 @@ class XspressZebra(Device):
                 configuration_attrs=['{}{}'.format(n, j) for n in ['pulse', 'gate', 'or', 'and']  
                                      for j in range(1,5)] + ['output{}'.format(i) for i in range(1, 9)] + ['gate_config', 'pulse_config', 'arm_trig'],
                 read_attrs=[])
-    xs = Cpt(CHXXspress3Detector, 'XSPRESS3-EXAMPLE:', add_prefix=())
-
+    #xs = Cpt(CHXXspress3Detector, 'XSPRESS3-EXAMPLE:', add_prefix=())
+    xs = Cpt(CHXXspress3Detector, 'XF:11IDB-ES{Xsp:1}:', add_prefix=())
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
