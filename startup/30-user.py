@@ -930,6 +930,66 @@ def olog_entry(string):
         olog_client.log(string)
     except:
         pass
+# automatic purging procedure for cryo-cooler:
+def purge_cryo():
+    """
+    automatically purge cryo-cooler according to Bruker manual
+    pre-requisit: GN2 of 1.5<p<3.0 bar connected to V21 
+    AND cryo-control NOT disabled, e.g. by EPS
+    calling sequence: purge_cryo()
+    LW 05/27/2018
+    """
+    print('start purging cryo-cooler')
+    print('Please make sure: \n 1) GN2 of 1.5<p<3.0 bar connected to V21 \n 2) cryo-control NOT disabled, e.g. by EPS')
+    print('going to check EPS status:')
+    if caget('XF:11IDA-OP{Cryo:1}Enbl-Sts') == 1:
+        print('cryo-cooler operations are enabled!')
+    else: raise cryo_Exception('error: cryo-cooler operations not enabled by EPS')
+    print('going to close all valves....')
+    caput('XF:11IDA-UT{Cryo:1-IV:21}Cmd:Cls-Cmd',1)
+    caput('XF:11IDA-UT{Cryo:1-IV:09}Cmd:Cls-Cmd',1)
+    caput('XF:11IDA-UT{Cryo:1-IV:19}Cmd:Cls-Cmd',1)
+    caput('XF:11IDA-UT{Cryo:1-IV:15}Cmd:Cls-Cmd',1)
+    caput('XF:11IDA-UT{Cryo:1-IV:20}Cmd:Cls-Cmd',1)
+    caput('XF:11IDA-UT{Cryo:1-IV:10}Pos-SP',0)
+    caput('XF:11IDA-UT{Cryo:1-IV:11}Pos-SP',0)
+    caput('XF:11IDA-UT{Cryo:1-IV:17_35}Cmd:Cls-Cmd',1) #V17.2
+    caput('XF:11IDA-UT{Cryo:1-IV:17_100}Cmd:Cls-Cmd',1)  #V17.1
+    print('purging step 1/3, taking 30 min \n current time: '+str(datetime.now()))
+    caput('XF:11IDA-UT{Cryo:1-IV:20}Cmd:Opn-Cmd',1)
+    caput('XF:11IDA-UT{Cryo:1-IV:09}Cmd:Opn-Cmd',1)
+    caput('XF:11IDA-UT{Cryo:1-IV:10}Pos-SP',100)
+    caput('XF:11IDA-UT{Cryo:1-IV:21}Cmd:Opn-Cmd',1)
+    for i in range(6):
+        print('time left on purging step 1/3: '+str(30-i*5)+'min \n')
+        RE(sleep(300))
+    print('purging step 1/3 complete....proceeding to 2/3!')
+    caput('XF:11IDA-UT{Cryo:1-IV:09}Cmd:Cls-Cmd',1)
+    caput('XF:11IDA-UT{Cryo:1-IV:11}Pos-SP',100)
+    print('purging step 2/3, taking 15 min \n current time: '+str(datetime.now()))
+    for i in range(3):
+       print('time left on purging step 2/3: '+str(15-i*5)+'min \n')
+       RE(sleep(300))
+    print('purging step 2/3 complete....proceeding to 3/3!')
+    caput('XF:11IDA-UT{Cryo:1-IV:11}Pos-SP',0)
+    caput('XF:11IDA-UT{Cryo:1-IV:17_35}Cmd:Opn-Cmd',1) 
+    caput('XF:11IDA-UT{Cryo:1-IV:17_100}Cmd:Opn-Cmd',1)
+    print('purging step 3/3, taking 15 min \n current time: '+str(datetime.now()))
+    for i in range(3):
+       print('time left on purging step 3/3: '+str(15-i*5)+'min \n')
+       RE(sleep(300))
+    print('purging COMPLETE! Closing all valves...')
+    caput('XF:11IDA-UT{Cryo:1-IV:21}Cmd:Cls-Cmd',1)
+    caput('XF:11IDA-UT{Cryo:1-IV:17_35}Cmd:Cls-Cmd',1) 
+    caput('XF:11IDA-UT{Cryo:1-IV:17_100}Cmd:Cls-Cmd',1)
+    caput('XF:11IDA-UT{Cryo:1-IV:10}Pos-SP',0)
+    caput('XF:11IDA-UT{Cryo:1-IV:20}Cmd:Cls-Cmd',1)
+
+
+    
+
+class cryo_Exception(Exception):
+    pass
 
 # Lutz's test Nov 08 end
 
