@@ -77,7 +77,8 @@ class EigerSimulatedFilePlugin(Device, FileStoreBase):
     def __init__(self, *args, **kwargs):
         self.sequence_id_offset = 1
         # This is changed for when a datum is a slice
-        self.resource_SPEC = "AD_EIGER2"
+        # also used by ophyd
+        self.filestore_spec = "AD_EIGER2"
         self.frame_num = None
         super().__init__(*args, **kwargs)
         self._datum_kwargs_map = dict()  # store kwargs for each uid
@@ -88,14 +89,12 @@ class EigerSimulatedFilePlugin(Device, FileStoreBase):
         set_and_wait(self.file_path, write_path)
         set_and_wait(self.file_write_name_pattern, '{}_$id'.format(res_uid))
         super().stage()
-        fn = (PurePath(self.file_path.get()) / res_uid).relative_to(self.reg_root)
-
+        fn = (PurePath(self.file_path.get()) / res_uid)
         ipf = int(self.file_write_images_per_file.get())
         # logger.debug("Inserting resource with filename %s", fn)
-        self._resource_uid = self._reg.register_resource(
-            self.resource_SPEC,
-            str(self.reg_root), fn,
-            {'images_per_file': ipf})
+        self._fn = fn
+        res_kwargs = {'images_per_file' : ipf}
+        self._generate_resource(res_kwargs)
 
     def generate_datum(self, key, timestamp, datum_kwargs):
         # The detector keeps its own counter which is uses label HDF5
@@ -257,7 +256,7 @@ class EigerManualTrigger(SingleTrigger, EigerBase):
         # in this case, we don't need this + 1 sequence id cludge
         # this is because we write datum after image is acquired
         self.file.sequence_id_offset = 0
-        self.file.resource_SPEC = "AD_EIGER_SLICE"
+        self.file.filestore_spec = "AD_EIGER_SLICE"
         self.file.frame_num = 0
         # set up order
         self.stage_sigs = OrderedDict()
