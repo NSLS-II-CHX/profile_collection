@@ -231,6 +231,8 @@ specpath = os.path.expanduser('/home/xf11id/specfiles/chx_spec_2017_11_28.spec')
 
 #spec_cb = DocumentToSpec('/home/xf11id/specfiles/testing.spec')
 spec_cb = DocumentToSpec(specpath)
+spec_cb.resource = lambda *x: None
+spec_cb.datum = lambda *x: None
 
 
 RE.subscribe(spec_cb)
