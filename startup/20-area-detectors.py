@@ -415,13 +415,16 @@ set_eiger_defaults(eiger4m)
 
 # setup manual eiger for 1d scans
 # prototype 
-eiger4m_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig4M}', name='eiger4m_manual')
+# trick: keep same epics name. This is fine
+# if there are colliding keys, then we're doing something wrong
+# (only one key name should be used)
+eiger4m_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig4M}', name='eiger4m_single')
 set_eiger_defaults(eiger4m_manual)
 
-eiger1m_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig1M}', name='eiger1m_manual')
+eiger1m_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig1M}', name='eiger1m_single')
 set_eiger_defaults(eiger1m_manual)
 
-eiger500k_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig500K}', name='eiger500k_manual')
+eiger500k_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig500K}', name='eiger500k_single')
 set_eiger_defaults(eiger500k_manual)
 
 def dscan_manual(dets, motor, start, stop, num):
