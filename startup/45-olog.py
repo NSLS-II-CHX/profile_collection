@@ -12,13 +12,13 @@ olog_client = SimpleOlogClient()
 #{{- readline.get_history_item(1)}}
 
 
-simple_template = """{{- start.plan_name }} ['{{ start.uid[:6] }}'] (scan num: {{ start.scan_id }})"""
+simple_template = """{{- start.plan_name }} ['{{ start.uid[:8] }}'] (scan num: {{ start.scan_id }})"""
 
-manual_count_template =  """{{- start.plan_name }} ['{{ start.uid[:6] }}'] (scan num: {{ start.scan_id }}) (Measurement: {{start.Measurement}} )"""
+manual_count_template =  """{{- start.plan_name }} ['{{ start.uid[:8] }}'] (scan num: {{ start.scan_id }}) (Measurement: {{start.Measurement}} )"""
 
  
 
-count_template = """{{- start.plan_name}} :  {{start.plan_args.num}} ['{{ start.uid[:6] }}'] (scan num: {{ start.scan_id }}) (Measurement: {{start.Measurement}} )
+count_template = """{{- start.plan_name}} :  {{start.plan_args.num}} ['{{ start.uid[:8] }}'] (scan num: {{ start.scan_id }}) (Measurement: {{start.Measurement}} )
 
 
 Scan Plan
