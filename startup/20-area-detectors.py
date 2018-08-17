@@ -45,6 +45,7 @@ class StandardProsilica(SingleTrigger, ProsilicaDetector):
     roi3 = Cpt(ROIPlugin, 'ROI3:')
     roi4 = Cpt(ROIPlugin, 'ROI4:')
     proc1 = Cpt(ProcessPlugin, 'Proc1:')
+    #over1 = Cpt(OverlayPlugin, 'Over1:')
 
     # This class does not save TIFFs. We make it aware of the TIFF plugin
     # only so that it can ensure that the plugin is not auto-saving.
@@ -115,8 +116,10 @@ class EigerBase(AreaDetector):
     """
     num_triggers = ADComponent(EpicsSignalWithRBV, 'cam1:NumTriggers')
     file = Cpt(EigerSimulatedFilePlugin, suffix='cam1:',
-               write_path_template='/XF11ID/data/%Y/%m/%d/',
-               root='/XF11ID/',
+               #write_path_template='/XF11ID/data/%Y/%m/%d/',
+               write_path_template='/nsls2/xf11id1/data/%Y/%m/%d/',
+               #root='/XF11ID/',
+               root='/nsls2/xf11id1/',
                reg=db.reg)
     beam_center_x = ADComponent(EpicsSignalWithRBV, 'cam1:BeamX')
     beam_center_y = ADComponent(EpicsSignalWithRBV, 'cam1:BeamY')
