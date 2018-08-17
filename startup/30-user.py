@@ -149,8 +149,8 @@ def ac_scan( ):
 
 
 def goto_500k():
-    caput('XF:11IDB-ES{Det:SAXS-Ax:X}Mtr.VAL',304.6242)
-    caput('XF:11IDB-ES{Det:SAXS-Ax:Y}Mtr.VAL',151.7567)   
+    caput('XF:11IDB-ES{Det:SAXS-Ax:X}Mtr.VAL',-22.7843)
+    caput('XF:11IDB-ES{Det:SAXS-Ax:Y}Mtr.VAL',-158.1450)   
 
 def goto_timepix():
     caput('XF:11IDB-ES{Det:SAXS-Ax:X}Mtr.VAL',-54.87 -10 )
@@ -160,8 +160,8 @@ def goto_timepix():
 def goto_4m():
 #    caput('XF:11IDB-ES{Det:SAXS-Ax:X}Mtr.VAL',477.9539)
 #    caput('XF:11IDB-ES{Det:SAXS-Ax:Y}Mtr.VAL',83.7567)
-    caput('XF:11IDB-ES{Det:SAXS-Ax:X}Mtr.VAL', 132.9603)
-    caput('XF:11IDB-ES{Det:SAXS-Ax:Y}Mtr.VAL',-133.9979)
+    caput('XF:11IDB-ES{Det:SAXS-Ax:X}Mtr.VAL', 134.9689)
+    caput('XF:11IDB-ES{Det:SAXS-Ax:Y}Mtr.VAL',-132.6950)
 
 def ct_500k(expt=.0001,frame_rate=9000,imnum=1,comment='eiger500K image'):
     caput('XF:11IDB-ES{Det:Eig500K}cam1:FWClear',1)   #remove files from detector
@@ -184,11 +184,11 @@ bpm2_feedback_selector_b = EpicsSignal('XF:11IDB-BI{XBPM:02}Fdbk:BEn-SP', name='
 bpm2_feedback_selector_a = EpicsSignal('XF:11IDB-BI{XBPM:02}Fdbk:AEn-SP', name='bpm2_feeedback_selector_a')
 
 
-class BPMReadings(Device):
-    x = Cpt(EpicsSignal, 'XF:11IDB-BI{XBPM:02}Pos:X-I')
-    y = Cpt(EpicsSignal, 'XF:11IDB-BI{XBPM:02}Pos:Y-I')
-
-bpm_readings = BPMReadings('', name='bpm_readings')
+#class BPMReadings(Device):
+#    x = Cpt(EpicsSignal, 'XF:11IDB-BI{XBPM:02}Pos:X-I')
+#   y = Cpt(EpicsSignal, 'XF:11IDB-BI{XBPM:02}Pos:Y-I')
+#
+#bpm_readings = BPMReadings('', name='bpm_readings')
 
 def feedback_ON():
     '''
@@ -574,6 +574,10 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
     if acqp=='auto':
         acqp=expt
     if det == 'eiger1m':    #get Dectris sequence ID
+        if acqp <.00034:
+            acqp=.00034
+        else:
+            pass
         seqid=caget('XF:11IDB-ES{Det:Eig1M}cam1:SequenceId')+1
         idpath=caget('XF:11IDB-ES{Det:Eig1M}cam1:FilePath',' {"longString":true}')
         caput('XF:11IDB-ES{Det:Eig1M}cam1:FWClear',1)    #remove files from the detector
@@ -585,8 +589,8 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
         else: 
             caput('XF:11IDB-ES{Det:Eig1M}cam1:FWNImagesPerFile',100)
     elif det == 'eiger4m':
-        if expt <.00134:
-            expt=.00134
+        if acqp <.00134:
+            acqp=.00134
         else:
             pass
         seqid=caget('XF:11IDB-ES{Det:Eig4M}cam1:SequenceId')+1
@@ -598,8 +602,8 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
         else: 
             caput('XF:11IDB-ES{Det:Eig4M}cam1:FWNImagesPerFile',100)
     elif det == 'eiger500k':
-        if expt <.000112:
-            expt=.000112
+        if acqp <.000112:
+            acqp=.000112
         else:
             pass
         seqid=caget('XF:11IDB-ES{Det:Eig500K}cam1:SequenceId')+1
@@ -720,14 +724,15 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
         detlist=[detector,OAV_writing] ##!!! need to change to OAV
         org_pt=caget('XF:11IDB-BI{Cam:10}cam1:AcquirePeriod_RBV')
         org_ni=caget('XF:11IDB-BI{Cam:10}cam1:NumImages_RBV')        
-        pt=(expt+acqp)*imnum #period between two images to span Eiger series (exposure time for OAV image neglected)
+        pt=(acqp)*imnum #period between two images to span Eiger series (exposure time for OAV image neglected)
         caput('XF:11IDB-BI{Cam:10}cam1:NumImages',2,wait=True)
         caput('XF:11IDB-BI{Cam:10}cam1:AcquirePeriod',pt,wait=True)
     elif OAV_mode == 'movie':
         detlist=[detector,OAV_writing] ##!!! need to change to OAV
         org_pt=caget('XF:11IDB-BI{Cam:10}cam1:AcquirePeriod_RBV')
         org_ni=caget('XF:11IDB-BI{Cam:10}cam1:NumImages_RBV')
-        ni=(expt+acqp)*imnum/(caget('XF:11IDB-BI{Cam:10}cam1:AcquireTime')+caget('XF:11IDB-BI{Cam:10}cam1:AcquirePeriod'))
+        ni=acqp*imnum/caget('XF:11IDB-BI{Cam:10}cam1:AcquirePeriod')
+        ni=ni+ni/10
         caput('XF:11IDB-BI{Cam:10}cam1:NumImages',np.ceil(ni),wait=True)
     else: raise series_Exception('error: OAV_mode needs to be none|single|start_end|movie...')
     if use_xbpm:
@@ -857,7 +862,11 @@ def wait_temperature(wait_time=1200,dead_band=1.,channel=1,log_entry='on'):
     curr_T=caget(ch[ch_num])
     # estimate how long it will take to reach the temperature setpoint:
     if ramp_on==1:
-        dtime=abs(T_set-curr_T)/ramp
+        try:
+            dtime=abs(T_set-curr_T)/ramp
+        except:
+            print('could not estimate time to reach target temperature...')
+            dtime=999.
     else:
         print('temperature ramping is off...checking temperature increase vs. time...this will take several minutes....')
         sleep(120) # wait 2 minutes (overcome T-inertia)
@@ -1044,7 +1053,7 @@ def check_bl():
 
     RE(feedback_ON())
     time.sleep(2)
-    if caget('XF:11IDB-BI{XBPM:02}Fdbk:BEn-SP')==1 and caget('XF:11IDB-BI{XBPM:02}Fdbk:AEn-SP')==1 and abs(caget('XF:11IDB-BI{XBPM:02}Pos:X-I'))+abs(caget('XF:11IDB-BI{XBPM:02}Pos:Y-I'))<.5:
+    if caget('XF:11IDB-BI{XBPM:02}Fdbk:BEn-SP')==1 and caget('XF:11IDB-BI{XBPM:02}Fdbk:AEn-SP')==1 and abs(caget('XF:11IDB-BI{XBPM:02}Pos:X-I'))+abs(caget('XF:11IDB-BI{XBPM:02}Pos:Y-I'))<.8:
         bl_ok=1
         print('################################\n')
         print('checked beamline: beam on DBPM, all ok!')
