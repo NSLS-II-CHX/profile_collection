@@ -19,6 +19,7 @@ from pathlib import PurePath
 from bluesky.plan_stubs import stage, unstage, open_run, close_run, trigger_and_read, pause
 from collections import OrderedDict
 
+from nslsii.ad33 import SingleTriggerV33, StatsPluginV33
 
 class TIFFPluginWithFileStore(TIFFPlugin, FileStoreTIFFIterativeWrite):
     """Add this as a component to detectors that write TIFFs."""
@@ -32,13 +33,13 @@ class TIFFPluginEnsuredOff(TIFFPlugin):
         self.stage_sigs.update([('auto_save', 'No')])
 
 
-class StandardProsilica(SingleTrigger, ProsilicaDetector):
+class StandardProsilica(SingleTriggerV33, ProsilicaDetector):
     image = Cpt(ImagePlugin, 'image1:')
-    stats1 = Cpt(StatsPlugin, 'Stats1:')
-    stats2 = Cpt(StatsPlugin, 'Stats2:')
-    stats3 = Cpt(StatsPlugin, 'Stats3:')
-    stats4 = Cpt(StatsPlugin, 'Stats4:')
-    stats5 = Cpt(StatsPlugin, 'Stats5:')
+    stats1 = Cpt(StatsPluginV33, 'Stats1:')
+    stats2 = Cpt(StatsPluginV33, 'Stats2:')
+    stats3 = Cpt(StatsPluginV33, 'Stats3:')
+    stats4 = Cpt(StatsPluginV33, 'Stats4:')
+    stats5 = Cpt(StatsPluginV33, 'Stats5:')
     trans1 = Cpt(TransformPlugin, 'Trans1:')
     roi1 = Cpt(ROIPlugin, 'ROI1:')
     roi2 = Cpt(ROIPlugin, 'ROI2:')
@@ -130,11 +131,11 @@ class EigerBase(AreaDetector):
     manual_trigger = ADComponent(EpicsSignalWithRBV, 'cam1:ManualTrigger')  # the checkbox
     special_trigger_button = ADComponent(EpicsSignal, 'cam1:Trigger')  # the button next to 'Start' and 'Stop'
     image = Cpt(ImagePlugin, 'image1:')
-    stats1 = Cpt(StatsPlugin, 'Stats1:')
-    stats2 = Cpt(StatsPlugin, 'Stats2:')
-    stats3 = Cpt(StatsPlugin, 'Stats3:')
-    stats4 = Cpt(StatsPlugin, 'Stats4:')
-    stats5 = Cpt(StatsPlugin, 'Stats5:')
+    stats1 = Cpt(StatsPluginV33, 'Stats1:')
+    stats2 = Cpt(StatsPluginV33, 'Stats2:')
+    stats3 = Cpt(StatsPluginV33, 'Stats3:')
+    stats4 = Cpt(StatsPluginV33, 'Stats4:')
+    stats5 = Cpt(StatsPluginV33, 'Stats5:')
     roi1 = Cpt(ROIPlugin, 'ROI1:')
     roi2 = Cpt(ROIPlugin, 'ROI2:')
     roi3 = Cpt(ROIPlugin, 'ROI3:')
@@ -162,7 +163,7 @@ class EigerBase(AreaDetector):
 
 
 
-class EigerSingleTrigger(SingleTrigger, EigerBase):
+class EigerSingleTrigger(SingleTriggerV33, EigerBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.stage_sigs['cam.trigger_mode'] = 0
@@ -248,7 +249,7 @@ class EigerFastTrigger(EigerBase):
         self.dispatch('image', ttime.time())
         return self.tr.trigger()
 
-class EigerManualTrigger(SingleTrigger, EigerBase):
+class EigerManualTrigger(SingleTriggerV33, EigerBase):
     '''
         Like Eiger Single Trigger but the triggering is done through the
         special trigger button.
@@ -269,7 +270,7 @@ class EigerManualTrigger(SingleTrigger, EigerBase):
         self.stage_sigs['manual_trigger'] = 1
         #self.stage_sigs['cam.acquire'] = 1
         self.stage_sigs['num_triggers'] = 10
-        
+
         # monkey patch
         # override with special trigger button, not acquire
         #self._acquisition_signal = self.special_trigger_button
@@ -312,7 +313,7 @@ class EigerManualTrigger(SingleTrigger, EigerBase):
             self.cam.array_counter.clear_sub(counter_cb)
             st._finished()
 
-        
+
         # first subscribe a callback
         self.cam.array_counter.subscribe(counter_cb, run=False) 
 
