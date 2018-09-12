@@ -4,7 +4,8 @@ from datetime import datetime
 from ophyd import (ProsilicaDetector, SingleTrigger, TIFFPlugin,
                    ImagePlugin, StatsPlugin, DetectorBase, HDF5Plugin,
                    AreaDetector, EpicsSignal, EpicsSignalRO, ROIPlugin,
-                   TransformPlugin, ProcessPlugin, Device, DeviceStatus,)
+                   TransformPlugin, ProcessPlugin, Device, DeviceStatus,
+                   OverlayPlugin)
 from ophyd.status import StatusBase
 from ophyd.device import Staged
 from ophyd.areadetector.cam import AreaDetectorCam
@@ -46,7 +47,7 @@ class StandardProsilica(SingleTriggerV33, ProsilicaDetector):
     roi3 = Cpt(ROIPlugin, 'ROI3:')
     roi4 = Cpt(ROIPlugin, 'ROI4:')
     proc1 = Cpt(ProcessPlugin, 'Proc1:')
-    #over1 = Cpt(OverlayPlugin, 'Over1:')
+    over = Cpt(OverlayPlugin, 'Over:')
 
     # This class does not save TIFFs. We make it aware of the TIFF plugin
     # only so that it can ensure that the plugin is not auto-saving.
