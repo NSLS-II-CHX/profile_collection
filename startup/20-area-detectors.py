@@ -132,11 +132,11 @@ class EigerBase(AreaDetector):
     manual_trigger = ADComponent(EpicsSignalWithRBV, 'cam1:ManualTrigger')  # the checkbox
     special_trigger_button = ADComponent(EpicsSignal, 'cam1:Trigger')  # the button next to 'Start' and 'Stop'
     image = Cpt(ImagePlugin, 'image1:')
-    stats1 = Cpt(StatsPluginV33, 'Stats1:')
-    stats2 = Cpt(StatsPluginV33, 'Stats2:')
-    stats3 = Cpt(StatsPluginV33, 'Stats3:')
-    stats4 = Cpt(StatsPluginV33, 'Stats4:')
-    stats5 = Cpt(StatsPluginV33, 'Stats5:')
+    stats1 = Cpt(StatsPlugin, 'Stats1:')
+    stats2 = Cpt(StatsPlugin, 'Stats2:')
+    stats3 = Cpt(StatsPlugin, 'Stats3:')
+    stats4 = Cpt(StatsPlugin, 'Stats4:')
+    stats5 = Cpt(StatsPlugin, 'Stats5:')
     roi1 = Cpt(ROIPlugin, 'ROI1:')
     roi2 = Cpt(ROIPlugin, 'ROI2:')
     roi3 = Cpt(ROIPlugin, 'ROI3:')
@@ -164,7 +164,7 @@ class EigerBase(AreaDetector):
 
 
 
-class EigerSingleTrigger(SingleTriggerV33, EigerBase):
+class EigerSingleTrigger(SingleTrigger, EigerBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.stage_sigs['cam.trigger_mode'] = 0
@@ -250,7 +250,7 @@ class EigerFastTrigger(EigerBase):
         self.dispatch('image', ttime.time())
         return self.tr.trigger()
 
-class EigerManualTrigger(SingleTriggerV33, EigerBase):
+class EigerManualTrigger(SingleTrigger, EigerBase):
     '''
         Like Eiger Single Trigger but the triggering is done through the
         special trigger button.
