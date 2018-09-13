@@ -4,7 +4,8 @@ from datetime import datetime
 from ophyd import (ProsilicaDetector, SingleTrigger, TIFFPlugin,
                    ImagePlugin, StatsPlugin, DetectorBase, HDF5Plugin,
                    AreaDetector, EpicsSignal, EpicsSignalRO, ROIPlugin,
-                   TransformPlugin, ProcessPlugin, Device, DeviceStatus,)
+                   TransformPlugin, ProcessPlugin, Device, DeviceStatus,
+                   OverlayPlugin)
 from ophyd.status import StatusBase
 from ophyd.device import Staged
 from ophyd.areadetector.cam import AreaDetectorCam
@@ -19,6 +20,7 @@ from pathlib import PurePath
 from bluesky.plan_stubs import stage, unstage, open_run, close_run, trigger_and_read, pause
 from collections import OrderedDict
 
+from nslsii.ad33 import SingleTriggerV33, StatsPluginV33
 
 class TIFFPluginWithFileStore(TIFFPlugin, FileStoreTIFFIterativeWrite):
     """Add this as a component to detectors that write TIFFs."""
@@ -32,20 +34,20 @@ class TIFFPluginEnsuredOff(TIFFPlugin):
         self.stage_sigs.update([('auto_save', 'No')])
 
 
-class StandardProsilica(SingleTrigger, ProsilicaDetector):
+class StandardProsilica(SingleTriggerV33, ProsilicaDetector):
     image = Cpt(ImagePlugin, 'image1:')
-    stats1 = Cpt(StatsPlugin, 'Stats1:')
-    stats2 = Cpt(StatsPlugin, 'Stats2:')
-    stats3 = Cpt(StatsPlugin, 'Stats3:')
-    stats4 = Cpt(StatsPlugin, 'Stats4:')
-    stats5 = Cpt(StatsPlugin, 'Stats5:')
+    stats1 = Cpt(StatsPluginV33, 'Stats1:')
+    stats2 = Cpt(StatsPluginV33, 'Stats2:')
+    stats3 = Cpt(StatsPluginV33, 'Stats3:')
+    stats4 = Cpt(StatsPluginV33, 'Stats4:')
+    stats5 = Cpt(StatsPluginV33, 'Stats5:')
     trans1 = Cpt(TransformPlugin, 'Trans1:')
     roi1 = Cpt(ROIPlugin, 'ROI1:')
     roi2 = Cpt(ROIPlugin, 'ROI2:')
     roi3 = Cpt(ROIPlugin, 'ROI3:')
     roi4 = Cpt(ROIPlugin, 'ROI4:')
     proc1 = Cpt(ProcessPlugin, 'Proc1:')
-    #over1 = Cpt(OverlayPlugin, 'Over1:')
+    over1 = Cpt(OverlayPlugin, 'Over1:')
 
     # This class does not save TIFFs. We make it aware of the TIFF plugin
     # only so that it can ensure that the plugin is not auto-saving.
@@ -269,7 +271,7 @@ class EigerManualTrigger(SingleTrigger, EigerBase):
         self.stage_sigs['manual_trigger'] = 1
         #self.stage_sigs['cam.acquire'] = 1
         self.stage_sigs['num_triggers'] = 10
-        
+
         # monkey patch
         # override with special trigger button, not acquire
         #self._acquisition_signal = self.special_trigger_button
@@ -312,7 +314,7 @@ class EigerManualTrigger(SingleTrigger, EigerBase):
             self.cam.array_counter.clear_sub(counter_cb)
             st._finished()
 
-        
+
         # first subscribe a callback
         self.cam.array_counter.subscribe(counter_cb, run=False) 
 
