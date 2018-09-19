@@ -601,7 +601,7 @@ def dcm_roll(Bragg,offset,distance,offmode='mm',pixsize=5.0):
     pixsize: pixel size for offset conversion to mm, if offsets are given in pixels
     default is 5um (pixsize is ignored, if offmode is 'mm')
     distance: DCM center of 1st xtal to diagnostic/slit [mm]
-    preset distances available: 'dcm_bpm',dcm_mbs', 'dcm-bds', 'dcm_sample'
+    preset distances available: 'dcm_bpm',dcm_mbs', 'dcm-bds', 'dcm_sample', 'dcm_s1' (pre-kinoform slit)
     """
     import numpy as np
     from scipy import optimize
@@ -619,7 +619,9 @@ def dcm_roll(Bragg,offset,distance,offmode='mm',pixsize=5.0):
     elif distance=='dcm_sample':
         d=16200 #distance dcm-sample in mm
     elif distance=='dcm_bds':
-        d=15500 #distance dcm-sample in mm
+        d=15500 #distance dcm-bds in mm
+    elif distance=='dcm_s1':
+        d=12155 #distance dcm-s1 (pre-kinoform slit)
     else:
         try:
             d=float(distance)
@@ -643,6 +645,7 @@ def dcm_roll(Bragg,offset,distance,offmode='mm',pixsize=5.0):
     plt.xlabel('Bragg angle  [deg.]')
     print('x_0= ',p1[0],'mm')
     print('\Delta \Phi= ',p1[1]*180.0/np.pi,'deg')
+    print('movr(dcm.r,'+str(p1[1]*180.0/np.pi)+')')
     
 
 def get_ID_calibration_dan(gapstart,gapstop,gapstep=.2,gapoff=0):
