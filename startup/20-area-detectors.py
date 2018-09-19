@@ -64,6 +64,7 @@ class StandardProsilica(SingleTrigger, ProsilicaDetector):
         return {'fields': [self.stats1.total.name]}
 
 class StandardProsilicaV33(SingleTriggerV33, ProsilicaDetector):
+    cam = Cpt(ProsilicaDetectorCamV33, 'cam1:')
     image = Cpt(ImagePlugin, 'image1:')
     stats1 = Cpt(StatsPluginV33, 'Stats1:')
     stats2 = Cpt(StatsPluginV33, 'Stats2:')
