@@ -406,8 +406,13 @@ for camera in all_standard_pros:
         stats_plugin.read_attrs = ['total']
         #camera.stage_sigs[stats_plugin.blocking_callbacks] = 1
 
+    #The following 2 lines should be used when not running AD V33
     #camera.stage_sigs[camera.roi1.blocking_callbacks] = 1
     #camera.stage_sigs[camera.trans1.blocking_callbacks] = 1
+
+    #The following line should only be used when running AD V33
+    camera.cam.ensure_nonblocking()
+
     camera.stage_sigs[camera.cam.trigger_mode] = 'Fixed Rate'
 
 for camera in [xray_eye1_writing, xray_eye2_writing,
