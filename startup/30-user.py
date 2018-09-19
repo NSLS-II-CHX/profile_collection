@@ -717,11 +717,13 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
         detlist=[detector]
     elif OAV_mode == 'single':
         detlist=[detector,OAV_writing] ## OAV  !!!!!
+        #detlist=[detector,OAV] ## NOT saving...for debugging only
         org_pt=caget('XF:11IDB-BI{Cam:10}cam1:AcquirePeriod_RBV')
         org_ni=caget('XF:11IDB-BI{Cam:10}cam1:NumImages_RBV')
         caput('XF:11IDB-BI{Cam:10}cam1:NumImages',1,wait=True)
     elif OAV_mode == 'start_end':
         detlist=[detector,OAV_writing] ##!!! need to change to OAV
+        #detlist=[detector,OAV] ## NOT saving...for debugging only
         org_pt=caget('XF:11IDB-BI{Cam:10}cam1:AcquirePeriod_RBV')
         org_ni=caget('XF:11IDB-BI{Cam:10}cam1:NumImages_RBV')        
         pt=(acqp)*imnum #period between two images to span Eiger series (exposure time for OAV image neglected)
@@ -729,6 +731,7 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
         caput('XF:11IDB-BI{Cam:10}cam1:AcquirePeriod',pt,wait=True)
     elif OAV_mode == 'movie':
         detlist=[detector,OAV_writing] ##!!! need to change to OAV
+        #detlist=[detector,OAV] ## NOT saving...for debugging only
         org_pt=caget('XF:11IDB-BI{Cam:10}cam1:AcquirePeriod_RBV')
         org_ni=caget('XF:11IDB-BI{Cam:10}cam1:NumImages_RBV')
         ni=acqp*imnum/caget('XF:11IDB-BI{Cam:10}cam1:AcquirePeriod')

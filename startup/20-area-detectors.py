@@ -6,6 +6,7 @@ from ophyd import (ProsilicaDetector, SingleTrigger, TIFFPlugin,
                    AreaDetector, EpicsSignal, EpicsSignalRO, ROIPlugin,
                    TransformPlugin, ProcessPlugin, Device, DeviceStatus,
                    OverlayPlugin, ProsilicaDetectorCam)
+
 from ophyd.status import StatusBase
 from ophyd.device import Staged
 from ophyd.areadetector.cam import AreaDetectorCam
@@ -89,8 +90,8 @@ class StandardProsilicaV33(SingleTriggerV33, ProsilicaDetector):
 class StandardProsilicaWithTIFF(StandardProsilica):
     tiff = Cpt(TIFFPluginWithFileStore,
                suffix='TIFF1:',
-               write_path_template='/XF11ID/data/%Y/%m/%d/',
-               root='/XF11ID/data',
+               write_path_template='/nsls2/xf11id1/data/%Y/%m/%d/',
+               root='/nsls2/xf11id1/data',
                reg=db.reg)
 
 class StandardProsilicaWithTIFFV33(StandardProsilicaV33):
