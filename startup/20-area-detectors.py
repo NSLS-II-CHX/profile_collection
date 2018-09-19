@@ -4,7 +4,8 @@ from datetime import datetime
 from ophyd import (ProsilicaDetector, SingleTrigger, TIFFPlugin,
                    ImagePlugin, StatsPlugin, DetectorBase, HDF5Plugin,
                    AreaDetector, EpicsSignal, EpicsSignalRO, ROIPlugin,
-                   TransformPlugin, ProcessPlugin, Device, DeviceStatus,)
+                   TransformPlugin, ProcessPlugin, Device, DeviceStatus,
+                   OverlayPlugin, ProsilicaDetectorCam)
 from ophyd.status import StatusBase
 from ophyd.device import Staged
 from ophyd.areadetector.cam import AreaDetectorCam
@@ -19,7 +20,7 @@ from pathlib import PurePath
 from bluesky.plan_stubs import stage, unstage, open_run, close_run, trigger_and_read, pause
 from collections import OrderedDict
 
-from nslsii.ad33 import SingleTriggerV33, StatsPluginV33
+from nslsii.ad33 import SingleTriggerV33, StatsPluginV33, CamV33mixin
 
 class TIFFPluginWithFileStore(TIFFPlugin, FileStoreTIFFIterativeWrite):
     """Add this as a component to detectors that write TIFFs."""
@@ -32,8 +33,36 @@ class TIFFPluginEnsuredOff(TIFFPlugin):
         super().__init__(*args, **kwargs)
         self.stage_sigs.update([('auto_save', 'No')])
 
+class ProsilicaDetectorCamV33(CamV33Mixin,ProsilicaDetectorCam):
+    '''This is used to update the Standard Prosilica to AD33. It adds the
+process
+    '''
+    pass
 
-class StandardProsilica(SingleTriggerV33, ProsilicaDetector):
+class StandardProsilica(SingleTrigger, ProsilicaDetector):
+    image = Cpt(ImagePlugin, 'image1:')
+    stats1 = Cpt(StatsPlugin, 'Stats1:')
+    stats2 = Cpt(StatsPlugin, 'Stats2:')
+    stats3 = Cpt(StatsPlugin, 'Stats3:')
+    stats4 = Cpt(StatsPlugin, 'Stats4:')
+    stats5 = Cpt(StatsPlugin, 'Stats5:')
+    trans1 = Cpt(TransformPlugin, 'Trans1:')
+    roi1 = Cpt(ROIPlugin, 'ROI1:')
+    roi2 = Cpt(ROIPlugin, 'ROI2:')
+    roi3 = Cpt(ROIPlugin, 'ROI3:')
+    roi4 = Cpt(ROIPlugin, 'ROI4:')
+    proc1 = Cpt(ProcessPlugin, 'Proc1:')
+    over1 = Cpt(OverlayPlugin, 'Over1:')
+
+    # This class does not save TIFFs. We make it aware of the TIFF plugin
+    # only so that it can ensure that the plugin is not auto-saving.
+    tiff = Cpt(TIFFPluginEnsuredOff, suffix='TIFF1:')
+
+    @property
+    def hints(self):
+        return {'fields': [self.stats1.total.name]}
+
+class StandardProsilicaV33(SingleTriggerV33, ProsilicaDetector):
     image = Cpt(ImagePlugin, 'image1:')
     stats1 = Cpt(StatsPluginV33, 'Stats1:')
     stats2 = Cpt(StatsPluginV33, 'Stats2:')
@@ -46,7 +75,7 @@ class StandardProsilica(SingleTriggerV33, ProsilicaDetector):
     roi3 = Cpt(ROIPlugin, 'ROI3:')
     roi4 = Cpt(ROIPlugin, 'ROI4:')
     proc1 = Cpt(ProcessPlugin, 'Proc1:')
-    #over1 = Cpt(OverlayPlugin, 'Over1:')
+    over1 = Cpt(OverlayPlugin, 'Over1:')
 
     # This class does not save TIFFs. We make it aware of the TIFF plugin
     # only so that it can ensure that the plugin is not auto-saving.
@@ -54,8 +83,7 @@ class StandardProsilica(SingleTriggerV33, ProsilicaDetector):
 
     @property
     def hints(self):
-        return {'fields': [self.stats1.total.name
-                           ]}
+        return {'fields': [self.stats1.total.name]}
 
 
 class StandardProsilicaWithTIFF(StandardProsilica):
@@ -65,6 +93,12 @@ class StandardProsilicaWithTIFF(StandardProsilica):
                root='/XF11ID/data',
                reg=db.reg)
 
+class StandardProsilicaWithTIFFV33(StandardProsilicaV33):
+    tiff = Cpt(TIFFPluginWithFileStore,
+               suffix='TIFF1:',
+               write_path_template='/XF11ID/data/%Y/%m/%d/',
+               root='/XF11ID/data',
+               reg=db.reg)
 
 class EigerSimulatedFilePlugin(Device, FileStoreBase):
     sequence_id = ADComponent(EpicsSignalRO, 'SequenceId')
@@ -131,11 +165,11 @@ class EigerBase(AreaDetector):
     manual_trigger = ADComponent(EpicsSignalWithRBV, 'cam1:ManualTrigger')  # the checkbox
     special_trigger_button = ADComponent(EpicsSignal, 'cam1:Trigger')  # the button next to 'Start' and 'Stop'
     image = Cpt(ImagePlugin, 'image1:')
-    stats1 = Cpt(StatsPluginV33, 'Stats1:')
-    stats2 = Cpt(StatsPluginV33, 'Stats2:')
-    stats3 = Cpt(StatsPluginV33, 'Stats3:')
-    stats4 = Cpt(StatsPluginV33, 'Stats4:')
-    stats5 = Cpt(StatsPluginV33, 'Stats5:')
+    stats1 = Cpt(StatsPlugin, 'Stats1:')
+    stats2 = Cpt(StatsPlugin, 'Stats2:')
+    stats3 = Cpt(StatsPlugin, 'Stats3:')
+    stats4 = Cpt(StatsPlugin, 'Stats4:')
+    stats5 = Cpt(StatsPlugin, 'Stats5:')
     roi1 = Cpt(ROIPlugin, 'ROI1:')
     roi2 = Cpt(ROIPlugin, 'ROI2:')
     roi3 = Cpt(ROIPlugin, 'ROI3:')
@@ -163,7 +197,7 @@ class EigerBase(AreaDetector):
 
 
 
-class EigerSingleTrigger(SingleTriggerV33, EigerBase):
+class EigerSingleTrigger(SingleTrigger, EigerBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.stage_sigs['cam.trigger_mode'] = 0
@@ -249,7 +283,7 @@ class EigerFastTrigger(EigerBase):
         self.dispatch('image', ttime.time())
         return self.tr.trigger()
 
-class EigerManualTrigger(SingleTriggerV33, EigerBase):
+class EigerManualTrigger(SingleTrigger, EigerBase):
     '''
         Like Eiger Single Trigger but the triggering is done through the
         special trigger button.
@@ -329,21 +363,21 @@ class EigerManualTrigger(SingleTriggerV33, EigerBase):
 
 
 ## This renaming should be reversed: no correspondance between CSS screens, PV names and ophyd....
-xray_eye1 = StandardProsilica('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye1')
-xray_eye2 = StandardProsilica('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
-xray_eye3 = StandardProsilica('XF:11IDB-BI{Cam:08}', name='xray_eye3')
-xray_eye4 = StandardProsilica('XF:11IDB-BI{Cam:09}', name='xray_eye4')
-OAV = StandardProsilica('XF:11IDB-BI{Cam:10}', name='OAV')
-xray_eye1_writing = StandardProsilicaWithTIFF('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye1')
-xray_eye2_writing = StandardProsilicaWithTIFF('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
-xray_eye3_writing = StandardProsilicaWithTIFF('XF:11IDB-BI{Cam:08}', name='xray_eye3')
-xray_eye4_writing = StandardProsilicaWithTIFF('XF:11IDB-BI{Cam:09}', name='xray_eye4')
-OAV_writing = StandardProsilicaWithTIFF('XF:11IDB-BI{Cam:10}', name='OAV')
-fs1 = StandardProsilica('XF:11IDA-BI{FS:1-Cam:1}', name='fs1')
-fs2 = StandardProsilica('XF:11IDA-BI{FS:2-Cam:1}', name='fs2')
-fs_wbs = StandardProsilica('XF:11IDA-BI{BS:WB-Cam:1}', name='fs_wbs')
+xray_eye1 = StandardProsilicaV33('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye1')
+xray_eye2 = StandardProsilicaV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
+xray_eye3 = StandardProsilicaV33('XF:11IDB-BI{Cam:08}', name='xray_eye3')
+xray_eye4 = StandardProsilicaV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
+OAV = StandardProsilicaV33('XF:11IDB-BI{Cam:10}', name='OAV')
+xray_eye1_writing = StandardProsilicaWithTIFFV33('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye1')
+xray_eye2_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
+xray_eye3_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:08}', name='xray_eye3')
+xray_eye4_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
+OAV_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:10}', name='OAV')
+fs1 = StandardProsilicaV33('XF:11IDA-BI{FS:1-Cam:1}', name='fs1')
+fs2 = StandardProsilicaV33('XF:11IDA-BI{FS:2-Cam:1}', name='fs2')
+fs_wbs = StandardProsilicaV33('XF:11IDA-BI{BS:WB-Cam:1}', name='fs_wbs')
 # dcm_cam = StandardProsilica('XF:11IDA-BI{Mono:DCM-Cam:1}', name='dcm_cam')
-fs_pbs = StandardProsilica('XF:11IDA-BI{BS:PB-Cam:1}', name='fs_pbs')
+fs_pbs = StandardProsilicaV33('XF:11IDA-BI{BS:PB-Cam:1}', name='fs_pbs')
 # elm = Elm('XF:11IDA-BI{AH401B}AH401B:',)
 
 all_standard_pros = [xray_eye1, xray_eye2, xray_eye3, xray_eye4,
@@ -357,10 +391,10 @@ for camera in all_standard_pros:
     for stats_name in ['stats1', 'stats2', 'stats3', 'stats4', 'stats5']:
         stats_plugin = getattr(camera, stats_name)
         stats_plugin.read_attrs = ['total']
-        camera.stage_sigs[stats_plugin.blocking_callbacks] = 1
+        #camera.stage_sigs[stats_plugin.blocking_callbacks] = 1
 
-    camera.stage_sigs[camera.roi1.blocking_callbacks] = 1
-    camera.stage_sigs[camera.trans1.blocking_callbacks] = 1
+    #camera.stage_sigs[camera.roi1.blocking_callbacks] = 1
+    #camera.stage_sigs[camera.trans1.blocking_callbacks] = 1
     camera.stage_sigs[camera.cam.trigger_mode] = 'Fixed Rate'
 
 for camera in [xray_eye1_writing, xray_eye2_writing,
@@ -418,7 +452,7 @@ set_eiger_defaults(eiger4m)
 
 
 # setup manual eiger for 1d scans
-# prototype 
+# prototype
 # trick: keep same epics name. This is fine
 # if there are colliding keys, then we're doing something wrong
 # (only one key name should be used)
