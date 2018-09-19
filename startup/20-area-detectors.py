@@ -21,7 +21,7 @@ from pathlib import PurePath
 from bluesky.plan_stubs import stage, unstage, open_run, close_run, trigger_and_read, pause
 from collections import OrderedDict
 
-from nslsii.ad33 import SingleTriggerV33, StatsPluginV33, CamV33mixin
+from nslsii.ad33 import SingleTriggerV33, StatsPluginV33, CamV33Mixin
 
 class TIFFPluginWithFileStore(TIFFPlugin, FileStoreTIFFIterativeWrite):
     """Add this as a component to detectors that write TIFFs."""
@@ -34,10 +34,13 @@ class TIFFPluginEnsuredOff(TIFFPlugin):
         super().__init__(*args, **kwargs)
         self.stage_sigs.update([('auto_save', 'No')])
 
-class ProsilicaDetectorCamV33(CamV33Mixin,ProsilicaDetectorCam):
+class ProsilicaDetectorCamV33(ProsilicaDetectorCam):
     '''This is used to update the Standard Prosilica to AD33. It adds the
 process
     '''
+    wait_for_plugins = Cpt(EpicsSignal, 'WaitForPlugins',
+                           string=True, kind='config')
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.stage_sigs['wait_for_plugins'] = 'Yes'
