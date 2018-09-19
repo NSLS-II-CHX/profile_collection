@@ -38,7 +38,18 @@ class ProsilicaDetectorCamV33(CamV33Mixin,ProsilicaDetectorCam):
     '''This is used to update the Standard Prosilica to AD33. It adds the
 process
     '''
-    pass
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.stage_sigs['wait_for_plugins'] = 'Yes'
+
+    def ensure_nonblocking(self):
+        self.stage_sigs['wait_for_plugins'] = 'Yes'
+        for c in self.parent.component_names:
+            cpt = getattr(self.parent, c)
+            if cpt is self:
+                continue
+            if hasattr(cpt, 'ensure_nonblocking'):
+                cpt.ensure_nonblocking()
 
 class StandardProsilica(SingleTrigger, ProsilicaDetector):
     image = Cpt(ImagePlugin, 'image1:')
