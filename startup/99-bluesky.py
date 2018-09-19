@@ -58,8 +58,9 @@ def move_E(energy, gap=[], xtal="Si111cryo", gapmode="auto", harm=5):
 		gap=xf.get_gap(energy,harm)
 		print('using calculated gap value from xfuncs!')
 	print('moving ivu_gap to '+str(gap)[:6]+'mm   and dcm.b to '+str(th_B)[:6]+'deg')
-	ivu_gap.move(gap)	
-	dcm.b.move(th_B)
+	RE(mov(ivu_gap,gap,dcm.b,th_B))
+	#ivu_gap.move(gap)	
+	#dcm.b.move(th_B)
 	print('Done! New X-ray energy is '+ str(dcm.en.user_readback.value/1000)+'keV')
 	
 
@@ -227,7 +228,8 @@ import suitcase.spec
 #suitcase.spec._SPEC_SCAN_NAMES.extend(['count', 'scan', 'relative_scan'])
 
 #specpath = os.path.expanduser('/home/xf11id/specfiles/chx_spec_2017_06_22.spec')
-specpath = os.path.expanduser('/home/xf11id/specfiles/chx_spec_2017_11_28.spec')
+#specpath = os.path.expanduser('/home/xf11id/specfiles/chx_spec_2017_11_28.spec')
+specpath = os.path.expanduser('/home/xf11id/specfiles/chx_spec_2018_09_17.spec')
 
 #spec_cb = DocumentToSpec('/home/xf11id/specfiles/testing.spec')
 spec_cb = DocumentToSpec(specpath)
