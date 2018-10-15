@@ -10,15 +10,45 @@ from bluesky import RunEngine
 from bluesky.utils import ProgressBarManager
 
 
+
+def Update_direct_bc( detxy=[134.9713, -132.6926], saxs_theta=0.0, bc = [ 1131, 1229],  det = '4m' ):
+    '''Update direct beam center 
+    Record detector position to metadata
+    If the detector is changed (different from the previous value), will change the meta data of direct beam center
+    Parameters:
+    	det: string, 4m for eiger 4M
+    		     1m for eiger 1M
+    		     500k for eiger 500K    
+    '''
+    detector_distance = caget("XF:11IDB-ES{Det:Eig4M}cam1:DetDist")
+    dx =   saxs_detector.x.user_readback.value
+    dy =   saxs_detector.y.user_readback.value
+    current_theta = caget("XF:11IDB-ES{Tbl:SAXS-Ax:Theta}Mtr.RBV")
+    angle_shift = (current_theta-saxs_theta)*np.pi/180.0*(detector_distance*1000.0)
+    dx = dx+angle_shift
+
+    if det =='4m':
+        nbx = int( bc[0] + (dx-detxy[0])*1000/75.) 
+        nby = int( bc[1] + (dy-detxy[1])*1000/75.)
+
+        caput('XF:11IDB-ES{Det:Eig4M}cam1:BeamX',  nbx)
+        caput('XF:11IDB-ES{Det:Eig4M}cam1:BeamY',  nby)
+        print('The direct beam center is changed to (%s, %s)'%(nbx, nby ) )
+        
+        
+
+    
+
+
 def beam_on():
     # foil_x.move(-22.0)
-    yield from mv(foil_x, -18.5)
-    print('Empty slot in the beam - sample exposed')
+    #yield from mv(foil_x, -18.5)
+    print('use att2.set_T(1) instead')
 
 def beam_off():
     # foil_x.move(-21.0)
-    yield from mv(foil_x, -21)
-    print('Protecting the sample with the Monitor W edge')
+    #yield from mv(foil_x, -21)
+    print('use att2.set_T(0) instead')
 
 
 @magics_class
@@ -40,56 +70,11 @@ class CHXMagics(Magics):
 
     @line_magic
     def beam_off(self, line):
-        plan = beam_off()
+        plan = att2.set_T(0)
         self.RE(plan)
         self._ensure_idle()
 
 get_ipython().register_magics(CHXMagics)
-
-
-#  def eiger4m_feedback():
-#      caput('XF:11IDB-ES{Det:Eig4M}cam1:ManualTrigger',1)    #set manual trigger mode
-#      beam_off()
-#      eiger4m_single.cam.acquire.put(1)     # opens fast shutter and arms detector
-#      sleep(1)
-#      caput('XF:11IDB-BI{XBPM:02}Fdbk:BEn-SP',1)    # feedback on
-#      caput('XF:11IDB-BI{XBPM:02}Fdbk:AEn-SP',1)
-#      sleep(2)
-#      beam_on()
-#      caput('XF:11IDB-ES{Det:Eig4M}cam1:Trigger',1)   # this needs to be done from BS, not from cha! Could even revert with previous command -> dark images at the beginning, but no beam damage overhead
-#     caput('XF:11IDB-ES{Det:Eig4M}cam1:ManualTrigger',0)    #remove manual trigger mode
-
-
-#def movr_samy(d ):
-#    '''A temporary solution for move sample in y direction by a combination of xv and zh 
-#    d: the relative move distance
-#    Octo 21, 2016
-#    '''
-#    angle=9
-#    movr( [diff.xv,diff.xh],[ d/np.sin(  radians(angle)), -1 * d/ np.tan( radians(angle))] )
-#    #movr( diff.xv, d/np.sin(  radians(angle)) )
-#    #movr( diff.xh, -1 * d/ np.tan( radians(angle)) )
-
-class ReversedEpicsMotor(EpicsMotor):
-    
-    def move(self, position, wait=True, **kwargs):
-        return super().move(-position, wait, **kwargs)
-
-    @property
-    def position(self):
-        return -super().position
-
-    def read(self):
-        vals = super().read()
-        print('vals = %s' % vals)
-        for k, v in vals.items():
-            v['value'] = -v['value']
-        return vals
-
-# keep this line as example!!!! bst_x = ReversedEpicsMotor('XF:11IDB-ES{Dif-Ax:XV2}Mtr', name='bst_x')
-#bst_x = ReversedEpicsMotor('XF:11IDB-ES{Dif-Ax:XV2}Mtr', name='bst_x')
-bst_y = ReversedEpicsMotor('XF:11IDB-ES{Dif-Ax:YV}Mtr', name = 'bst_y')
-#bst_rot = diff_om
 
 
 def change_motor_name( device):
@@ -104,50 +89,6 @@ def change_motor_name( device):
 for motors in [ diff, bpm2, mbs, dcm, tran, s1, s2, s4]:
     change_motor_name( motors )
     
-# Alias motors
-sam_x = diff.xb   # xh,zh stage was dismounted for Headrick experiment
-sam_y = diff.yh
-sam_phi = diff.phh
-#sam_z = diff.zh
-#sam_th = diff.thh
-#sam_chi = diff.chh
-
-
-def ac_scan2( ):    
-    for i in range(40):
-        #RE(mvr(diff.yh, 0.02))
-        yhv =     diff.yh.user_readback.value
-
-        series(det='eiger4m',expt= 1/3, acqp='auto', imnum=1, feedback_on=True,comment=RE.md['sample']+ 'yh=U%s'%yhv+ '1 sec, 1 frames, MBS 0.4 x 0.05 use Tim: epix Det_Run 20')
-        RE(mvr(diff.yh, -0.1))
-       #        time.sleep(  0.2  )
-    RE(mvr(diff.xh, -0.02))
-    for i in range(20):
-        yhv =     diff.yh.user_readback.value
-        series(det='eiger4m',expt= 1/3, acqp='auto', imnum=1, feedback_on=True,comment=RE.md['sample']+ 'yh=D%s'%yhv+ '1 sec, 1 frames, MBS 0.4 x 0.05 use Tim: epix Det_Run 20')
-
-
-
-def ac_scan( ):    
-    for i in range(80):
-        #RE(mvr(diff.yh, 0.02))
-        yhv =     diff.yh.user_readback.value
-        series(det='eiger4m',expt= 1/3, acqp='auto', imnum=1, feedback_on=True,comment=RE.md['sample']+ 'yh=U%s'%yhv+ '1 sec, 1 frames, MBS 0.4 x 0.05 use Tim: epix Det_Run 17')
-        RE(mvr(diff.yh, -0.1))
-       #        time.sleep(  0.2  )
-    RE(mvr(diff.xh, -0.02))
-    for i in range(40):
-        yhv =     diff.yh.user_readback.value
-        series(det='eiger4m',expt= 1/3, acqp='auto', imnum=1, feedback_on=True,comment=RE.md['sample']+ 'yh=D%s'%yhv+ '1 sec, 1 frames, MBS 0.4 x 0.05 use Tim: epix Det_Run 17')
-        RE(mvr(diff.yh, 0.2))
-        #time.sleep(  0.2  )
-      
-
-
-
-
-
-
 def goto_500k():
     caput('XF:11IDB-ES{Det:SAXS-Ax:X}Mtr.VAL',-22.7843)
     caput('XF:11IDB-ES{Det:SAXS-Ax:Y}Mtr.VAL',-158.1450)   
@@ -158,10 +99,15 @@ def goto_timepix():
 
 
 def goto_4m():
-#    caput('XF:11IDB-ES{Det:SAXS-Ax:X}Mtr.VAL',477.9539)
-#    caput('XF:11IDB-ES{Det:SAXS-Ax:Y}Mtr.VAL',83.7567)
-    caput('XF:11IDB-ES{Det:SAXS-Ax:X}Mtr.VAL', 134.9689)
-    caput('XF:11IDB-ES{Det:SAXS-Ax:Y}Mtr.VAL',-132.6950)
+    #caput('XF:11IDB-ES{Det:SAXS-Ax:X}Mtr.VAL',477.9539)
+    #caput('XF:11IDB-ES{Det:SAXS-Ax:Y}Mtr.VAL',83.7567)
+    #caput('XF:11IDB-ES{Det:SAXS-Ax:X}Mtr.VAL', 134.9689)
+    #caput('XF:11IDB-ES{Det:SAXS-Ax:Y}Mtr.VAL',-132.6950)
+    
+    caput('XF:11IDB-ES{Det:SAXS-Ax:X}Mtr.VAL', 138.8378 )
+    caput('XF:11IDB-ES{Det:SAXS-Ax:Y}Mtr.VAL',-132.6985 )    
+    
+    
 
 def ct_500k(expt=.0001,frame_rate=9000,imnum=1,comment='eiger500K image'):
     caput('XF:11IDB-ES{Det:Eig500K}cam1:FWClear',1)   #remove files from detector
@@ -248,54 +194,6 @@ def feedback_OFF(epics_feedback_on=True):
        yield from mv(hdm_pid_setpoint, pos)
        #Set the PID loop to maintain this position.
        yield from mv(hdm_feedback_selector, 1)
-
-# alignment/measurement macros are better defined in user specific locations
-#def alignment_mode():
-#    """
-#    puts beamline into alignment mode: att.set_T(1E-4)
-#    mov(saxs_bst.x,119.4151)
-#    mov(foil_x,-26.) - empty slot 
-#    """
-#    print('putting beamline into alignment mode: transmission: 1E-4, beamstop: out, diagnostics:out')
-#    fast_sh.close()
-#    att.set_T(1E-4)
-#    mov(saxs_bst.x,119.41)
-#    mov(foil_x,-26.)
-#    detselect(eiger4m_single)
-#    caput('XF:11IDB-ES{Det:Eig4M}cam1:SaveFiles',0)
-#    print('Not saving the Eiger files ...')
-#    eiger4m_single.cam.acquire_time.value=.1
-#    eiger4m_single.cam.acquire_period.value=.1
-#    eiger4m_single.cam.num_images.value=1
-#    #movr(saxs_bst.y1,5.)
-#
-#def measurement_mode():
-#    """
-#    puts beamline into measurement mode: 
-#    att.set_T(1)
-#    mov(saxs_bst.x,129.41)   !!! absolute !!!
-#    """
-#    print('putting beamline into measurement mode: transmission: 1, beamstop: in')
-#    print('removing files from detector')
-#    caput('XF:11IDB-ES{Det:Eig4M}cam1:FWClear',1)
-#    caput('XF:11IDB-ES{Det:Eig4M}cam1:SaveFiles',1)
-#    print('Should be also saving files now ...')
-#    mov(saxs_bst.x,129.41)
-#    att.set_T(1)
-#    caput('XF:11IDB-ES{Dif-Ax:PhH}Cmd:Kill-Cmd',1)
-
-#def diode_OUT():
-#    mov(foil_x,-26.)
-
-def diode_IN():
-    """
-    Moves the pin diode inthe beam to foil_x=17.5 (the sample is thus protected)
-    """
-    nominal_value=17.5
-    RE(mv(foil_x,nominal_value))
-    if abs(foil_x.user_readback.value-nominal_value)>0.5:
-        raise series_Exception('Pin diode position was not reached')
-
 
 
 def snap(det='eiger4m',expt=0.1,comment='Single image'):
