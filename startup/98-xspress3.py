@@ -150,6 +150,10 @@ class XspressZebra(Device):
         # arming zebra
         self.zebra.arm.set(1)
         return st
+    
+    @property
+    def hints(self):
+        return {'fields': [  self.xs.channel1.rois.roi01.value.name ] } #,  self.xs.channel1.rois.roi01.value_sum.name,      ]}    
 
 
 def construct_mca():
