@@ -244,6 +244,9 @@ fsh_y=EpicsMotor('XF:11IDB-OP{FS:1-Ax:Y}Mtr', name='fsh_y')  # fast shutter posi
 #smp =SmarPod('XF:11IDB-ES{SPod:1-',name='smp')    # SmarPod
 saxs_detector = XYMotor('XF:11IDB-ES{Det:SAXS', name='saxs_detector')  # SAXS detector motion
 
+# long SmarAct stage with coupled carriages (used e.g for multi-sample mount
+sample_x = EpicsMotor('XF:11IDB-ES{LongRange}Mtr', name='sample_x')
+
 # Diagnostic Manipulators
 foil_y = EpicsMotor('XF:11IDA-BI{Foil:Bpm-Ax:Y}Mtr', name='foil_y')
 
