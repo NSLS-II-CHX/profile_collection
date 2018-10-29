@@ -25,37 +25,40 @@ def get_beam_center_update( uid = -1, threshold = 200  ):
     keys = [k for k, v in hdr.descriptors[0]['data_keys'].items()     if 'external' in v]
     det = keys[0]    
     print('The detector is %s.'%det)
-
+    imgs = list(db[uid].data(det))[0]
     if det =='eiger1m_single_image':
         Chip_Mask=np.load( '/XF11ID/analysis/2017_1/masks/Eiger1M_Chip_Mask.npy')
-    elif det =='eiger4m_single_image' or md['detector'] == 'image':    
+        img = imgs[0]
+    elif det =='eiger4m_single_image' or det == 'image':    
         Chip_Mask= np.array(np.load( '/XF11ID/analysis/2017_1/masks/Eiger4M_chip_mask.npy'), dtype=bool)
         BadPix =     np.load('/XF11ID/analysis/2018_1/BadPix_4M.npy'  )  
         Chip_Mask.ravel()[BadPix] = 0
         Chip_Mask[1225:1234, 1156:1163] = 0
+        img = imgs[0]
+        pixel_mask =  1- np.int_( np.array( imgs.md['pixel_mask'], dtype= bool)  )
     elif det =='eiger500K_single_image':
         #print('here')
         Chip_Mask=  np.load( '/XF11ID/analysis/2017_1/masks/Eiger500K_Chip_Mask.npy')  #to be defined the chip mask
         Chip_Mask = np.rot90(Chip_Mask)
         pixel_mask = np.rot90(  1- np.int_( np.array( imgs.md['pixel_mask'], dtype= bool))   )
-
+        img = np.rot90( imgs[0] )
     else:
-        Chip_Mask = 1        
-        
-    imgs = list(db[uid].data(det))[0]
-    pixel_mask =  1- np.int_( np.array( imgs.md['pixel_mask'], dtype= bool)  )
-    img = imgs[0] * pixel_mask * Chip_Mask
+        Chip_Mask = 1   
+     
+    img = img * pixel_mask * Chip_Mask
     imax = np.max(img)
+    print('The value of the max intensity is: %s.'%imax)
     if imax > threshold:
         cx_, cy_ = np.where( img == np.max(img) )
         cx, cy =cx_[0], cy_[0]
-        center = [ cx, cy ]
-        print( 'The center is: %s.'%center)#, cx, cy)
+        
+        
         if det =='eiger4m_single_image':    
             caput('XF:11IDB-ES{Det:Eig4M}cam1:BeamX',  cx)
             caput('XF:11IDB-ES{Det:Eig4M}cam1:BeamY',  cy)
              
         elif det =='eiger500K_single_image':    
+            cx = 1030 -1 - cx
             caput('XF:11IDB-ES{Det:Eig500K}cam1:BeamX',  cx)
             caput('XF:11IDB-ES{Det:Eig500K}cam1:BeamY',  cy)
             
@@ -64,8 +67,9 @@ def get_beam_center_update( uid = -1, threshold = 200  ):
             caput('XF:11IDB-ES{Det:Eig1m}cam1:BeamY',  cy)
         else:
             pass
-        print('The direct beam center is changed to (%s, %s)'%(cx, cy ) )             
-            
+        print('The direct beam center is changed to (%s, %s)'%(cx, cy ) ) 
+        center = [ cx, cy ]            
+        print( 'The center is: %s.'%center)#, cx, cy)    
     else:
         print('The scattering intensity is too low. Can not find the beam center. Please check your beamline.')
     show_img( img,  vmin= 1e-3, vmax= 1e1, logs=True, aspect=1, cmap = cm.winter ,center= center[::-1] )#save_format='tif',
