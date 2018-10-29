@@ -8,6 +8,71 @@ from math import radians
 from IPython.core.magic import Magics, magics_class, line_magic
 from bluesky import RunEngine
 from bluesky.utils import ProgressBarManager
+from matplotlib import cm
+
+
+def get_beam_center_update( uid = -1, threshold = 200  ):
+    '''Find the beam center on detector and update the PV accordingly
+       The image is masked by pixel mask and the known pixel masks
+    Input:
+        uid: string or integer, e.g, -1 is the last data
+        threshold: the max intensity on the detector, if less, will not update beam center
+    Output:
+        None
+    
+    '''
+    hdr = db[uid]
+    keys = [k for k, v in hdr.descriptors[0]['data_keys'].items()     if 'external' in v]
+    det = keys[0]    
+    print('The detector is %s.'%det)
+
+    if det =='eiger1m_single_image':
+        Chip_Mask=np.load( '/XF11ID/analysis/2017_1/masks/Eiger1M_Chip_Mask.npy')
+    elif det =='eiger4m_single_image' or md['detector'] == 'image':    
+        Chip_Mask= np.array(np.load( '/XF11ID/analysis/2017_1/masks/Eiger4M_chip_mask.npy'), dtype=bool)
+        BadPix =     np.load('/XF11ID/analysis/2018_1/BadPix_4M.npy'  )  
+        Chip_Mask.ravel()[BadPix] = 0
+        Chip_Mask[1225:1234, 1156:1163] = 0
+    elif det =='eiger500K_single_image':
+        #print('here')
+        Chip_Mask=  np.load( '/XF11ID/analysis/2017_1/masks/Eiger500K_Chip_Mask.npy')  #to be defined the chip mask
+        Chip_Mask = np.rot90(Chip_Mask)
+        pixel_mask = np.rot90(  1- np.int_( np.array( imgs.md['pixel_mask'], dtype= bool))   )
+
+    else:
+        Chip_Mask = 1        
+        
+    imgs = list(db[uid].data(det))[0]
+    pixel_mask =  1- np.int_( np.array( imgs.md['pixel_mask'], dtype= bool)  )
+    img = imgs[0] * pixel_mask * Chip_Mask
+    imax = np.max(img)
+    if imax > threshold:
+        cx_, cy_ = np.where( img == np.max(img) )
+        cx, cy =cx_[0], cy_[0]
+        center = [ cx, cy ]
+        print( 'The center is: %s.'%center)#, cx, cy)
+        if det =='eiger4m_single_image':    
+            caput('XF:11IDB-ES{Det:Eig4M}cam1:BeamX',  cx)
+            caput('XF:11IDB-ES{Det:Eig4M}cam1:BeamY',  cy)
+             
+        elif det =='eiger500K_single_image':    
+            caput('XF:11IDB-ES{Det:Eig500K}cam1:BeamX',  cx)
+            caput('XF:11IDB-ES{Det:Eig500K}cam1:BeamY',  cy)
+            
+        elif det =='eiger1m_single_image':    
+            caput('XF:11IDB-ES{Det:Eig1m}cam1:BeamX',  cx)
+            caput('XF:11IDB-ES{Det:Eig1m}cam1:BeamY',  cy)
+        else:
+            pass
+        print('The direct beam center is changed to (%s, %s)'%(cx, cy ) )             
+            
+    else:
+        print('The scattering intensity is too low. Can not find the beam center. Please check your beamline.')
+    show_img( img,  vmin= 1e-3, vmax= 1e1, logs=True, aspect=1, cmap = cm.winter ,center= center[::-1] )#save_format='tif',
+             #image_name= 'uid=%s'%uid,  #cmap = cmap_albula,
+             #save=False,     path='', center= center[::-1] )
+
+ 
 
 
 
@@ -450,7 +515,7 @@ def prep_series_feedback():
     #RE(mv(bpm2_feedback_selector_a, 1))
     
 # Lutz's test Nov 08 start
-def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comment='', feedback_on=False, analysis='', use_xbpm=False,OAV_mode='none'):
+def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comment='', feedback_on=False, analysis='', use_xbpm=False, OAV_mode='none',auto_compression=False):
     """
     det='eiger1m' / 'eiger4m' / 'eiger500k'
     shutter_mode='single' / 'multi'
@@ -466,7 +531,9 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
     eiger500k added by LW 03/20/2018, Eiger500k multi shutter NOT yet implemented,
               debug by YG 03/22/2018, fix a bug and add Eiger500K multi mode
     03/26/2018: added hook 'analysis' for jupyter pipeline
-
+    10/27/2018: added option to add acquired uid to list for automatic compression:
+    auto_compression=False/True, True: add uid to document "general list" in collection "data_acquisition_collection" in database 'samples'
+    database access is done in a 'try', to avoid errors in case of problems with database access	
     """
     print('start of series: '+time.ctime())
     if acqp=='auto':
@@ -614,13 +681,13 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
     if OAV_mode == 'none':
         detlist=[detector]
     elif OAV_mode == 'single':
-        detlist=[detector,OAV_writing] ## OAV  !!!!!
+        detlist=[detector,OAV_writing] 
         #detlist=[detector,OAV] ## NOT saving...for debugging only
         org_pt=caget('XF:11IDB-BI{Cam:10}cam1:AcquirePeriod_RBV')
         org_ni=caget('XF:11IDB-BI{Cam:10}cam1:NumImages_RBV')
         caput('XF:11IDB-BI{Cam:10}cam1:NumImages',1,wait=True)
     elif OAV_mode == 'start_end':
-        detlist=[detector,OAV_writing] ##!!! need to change to OAV
+        detlist=[detector,OAV_writing] 
         #detlist=[detector,OAV] ## NOT saving...for debugging only
         org_pt=caget('XF:11IDB-BI{Cam:10}cam1:AcquirePeriod_RBV')
         org_ni=caget('XF:11IDB-BI{Cam:10}cam1:NumImages_RBV')        
@@ -628,7 +695,7 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
         caput('XF:11IDB-BI{Cam:10}cam1:NumImages',2,wait=True)
         caput('XF:11IDB-BI{Cam:10}cam1:AcquirePeriod',pt,wait=True)
     elif OAV_mode == 'movie':
-        detlist=[detector,OAV_writing] ##!!! need to change to OAV
+        detlist=[detector,OAV_writing] 
         #detlist=[detector,OAV] ## NOT saving...for debugging only
         org_pt=caget('XF:11IDB-BI{Cam:10}cam1:AcquirePeriod_RBV')
         org_ni=caget('XF:11IDB-BI{Cam:10}cam1:NumImages_RBV')
@@ -638,7 +705,7 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
     else: raise series_Exception('error: OAV_mode needs to be none|single|start_end|movie...')
     if use_xbpm:
         caput( 'XF:11IDB-BI{XBPM:02}FaSoftTrig-SP',1,wait=True) #yugang add at Sep 13, 2017 for test fast shutter by using xbpm
-        print('User XBPM to monitor beam intensity.')
+        print('Use XBPM to monitor beam intensity.')
     if feedback_on:
         RE(prep_series_feedback())
     #RE(count([detector]),Measurement=comment)  ### ACQUISITION
@@ -647,22 +714,24 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
     if OAV_mode != 'none':      ####! OAV !!!!!
         caput('XF:11IDB-BI{Cam:10}cam1:NumImages',org_ni)
         caput('XF:11IDB-BI{Cam:10}cam1:AcquirePeriod',org_pt)
+    ####### add acquired uid to database list for automatic compression #########
+    if auto_compression:
+        try:
+            uid_add=db[-1]['start']['uid']
+            uid_list=data_acquisition_collection.find_one({'_id':'general_list'})['uid_list']
+            uid_list.append(uid_add)
+            data_acquisition_collection.update_one({'_id': 'general_list'},{'$set':{'uid_list' : uid_list}})
+            print('Added uid %s to list for automatic compression!'%uid_add)
+        except:
+            print('Sorry, failed to add uid %s to list for automatic compression!'%uid_add)
+    else:
+        print('uid not added to database for automatic compression')
+    ###############################################################################
+    # remove series specific keys from general metadata:
+    for ke in ['exposure time','acquire period','shutter mode','number of images','sequence id','T_yoke','T_sample','feedback_x','feedback_y','transmission','OAV_mode','analysis']:
+    	del RE.md[ke]
 
-    #print('remove metadata: '+time.ctime())    
-    a=RE.md.pop('exposure time')        # remove eiger series specific meta data (need better way to remove keys 'silently'....)
-    a=RE.md.pop('acquire period')
-    a=RE.md.pop('shutter mode')
-    a=RE.md.pop('number of images')
-    a=RE.md.pop('data path')
-    a=RE.md.pop('sequence id')
-    ## remove experiment specific dictionary key
-    a=RE.md.pop('T_yoke')
-    a=RE.md.pop('T_sample')
-    a=RE.md.pop('feedback_x')
-    a=RE.md.pop('feedback_y')
-    a=RE.md.pop('transmission')
-    a=RE.md.pop('OAV_mode')
-    a=RE.md.pop('analysis')
+
 
 class series_Exception(Exception):
     pass
