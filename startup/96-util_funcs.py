@@ -194,7 +194,7 @@ def show_cut(img, cut=1000, direction='horz',width=10,title=None):
 def show_img(img, ax=None,save=False, vmin=None, vmax=None,cmap='spectral',fontsize=24,
              axis_on=True,title_on=True,xlabel=None,ylabel=None,aspect=None,
         title='img_', show=True, logs=False,outDir=None, sizex=9,sizey=9,
-        ylim=None, xlim=None, xticks=True, yticks=True,extent=None):
+        ylim=None, xlim=None, xticks=True, yticks=True,extent=None,center=None,):
              #rescale=None): #extent=None):
     
     """show a two-D image"""
@@ -250,7 +250,8 @@ def show_img(img, ax=None,save=False, vmin=None, vmax=None,cmap='spectral',fonts
     elif yticks is True:plt.setp( ax.get_yticklabels(),fontsize=fontsize*.8, visible=True)#
     else:plt.yticks( yticks,fontsize=fontsize *.8 )
     if ax is None:cbar = fig.colorbar(cax, ticks=[vmin,vmax])
-
+    if center is not None:
+        plot1D(center[1],center[0],ax=ax, c='b', m='o', legend='')
     #if ylim is not None:ax.set_ylim(ylim)
     #if xlim is not None:ax.set_xlim(xlim)
     
