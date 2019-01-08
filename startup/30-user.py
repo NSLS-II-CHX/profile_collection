@@ -11,6 +11,11 @@ from bluesky.utils import ProgressBarManager
 from matplotlib import cm
 
 
+def md_reset(  ):
+    sid = RE.md['scan_id']
+    RE.md =  {'beamline_id': 'CHX', 'scan_id': sid, 'user': 'CHX', 'run': '2018-3', 'owner': 'CHX', 'sample': 'N.A.'}
+    
+
 def get_beam_center_update( uid = -1, threshold = 200  ):
     '''Find the beam center on detector and update the PV accordingly
        The image is masked by pixel mask and the known pixel masks
@@ -49,20 +54,22 @@ def get_beam_center_update( uid = -1, threshold = 200  ):
     imax = np.max(img)
     print('The value of the max intensity is: %s.'%imax)
     if imax > threshold:
-        cx_, cy_ = np.where( img == np.max(img) )
-        cx, cy =cx_[0], cy_[0]
-        
+        cx_, cy_ = np.where( img == np.max(img) )  
         
         if det =='eiger4m_single_image':    
+            cx, cy =cy_[0], cx_[0]
             caput('XF:11IDB-ES{Det:Eig4M}cam1:BeamX',  cx)
             caput('XF:11IDB-ES{Det:Eig4M}cam1:BeamY',  cy)
+            
              
         elif det =='eiger500K_single_image':    
+            cx, cy =cx_[0], cy_[0]
             cx = 1030 -1 - cx
             caput('XF:11IDB-ES{Det:Eig500K}cam1:BeamX',  cx)
             caput('XF:11IDB-ES{Det:Eig500K}cam1:BeamY',  cy)
             
-        elif det =='eiger1m_single_image':    
+        elif det =='eiger1m_single_image':   
+            cx, cy =cy_[0], cx_[0] 
             caput('XF:11IDB-ES{Det:Eig1m}cam1:BeamX',  cx)
             caput('XF:11IDB-ES{Det:Eig1m}cam1:BeamY',  cy)
         else:
@@ -72,7 +79,7 @@ def get_beam_center_update( uid = -1, threshold = 200  ):
         print( 'The center is: %s.'%center)#, cx, cy)    
     else:
         print('The scattering intensity is too low. Can not find the beam center. Please check your beamline.')
-    show_img( img,  vmin= 1e-3, vmax= 1e1, logs=True, aspect=1, cmap = cm.winter ,center= center[::-1] )#save_format='tif',
+    show_img( img,  vmin= 1e-3, vmax= 1e1, logs=True, aspect=1, cmap = cm.winter ,center= center)#[::-1] )#save_format='tif',
              #image_name= 'uid=%s'%uid,  #cmap = cmap_albula,
              #save=False,     path='', center= center[::-1] )
 
@@ -158,23 +165,7 @@ def change_motor_name( device):
 for motors in [ diff, bpm2, mbs, dcm, tran, s1, s2, s4]:
     change_motor_name( motors )
     
-def goto_500k():
-    caput('XF:11IDB-ES{Det:SAXS-Ax:X}Mtr.VAL',-22.7843)
-    caput('XF:11IDB-ES{Det:SAXS-Ax:Y}Mtr.VAL',-158.1450)   
 
-def goto_timepix():
-    caput('XF:11IDB-ES{Det:SAXS-Ax:X}Mtr.VAL',-54.87 -10 )
-    caput('XF:11IDB-ES{Det:SAXS-Ax:Y}Mtr.VAL',192.54)   
-
-
-def goto_4m():
-    #caput('XF:11IDB-ES{Det:SAXS-Ax:X}Mtr.VAL',477.9539)
-    #caput('XF:11IDB-ES{Det:SAXS-Ax:Y}Mtr.VAL',83.7567)
-    #caput('XF:11IDB-ES{Det:SAXS-Ax:X}Mtr.VAL', 134.9689)
-    #caput('XF:11IDB-ES{Det:SAXS-Ax:Y}Mtr.VAL',-132.6950)
-    
-    caput('XF:11IDB-ES{Det:SAXS-Ax:X}Mtr.VAL', 138.8378 )
-    caput('XF:11IDB-ES{Det:SAXS-Ax:Y}Mtr.VAL',-132.6985 )    
     
     
 
@@ -490,9 +481,9 @@ def eiger1m_series(expt=.1,acqp='auto',imnum=5,comment=''):
     print('Dectris sequence id: '+str(int(seqid)))
     ### data acquisition
     RE(manual_count(det=eiger1m_single),Measurement=comment)
-    beam_on()
+    #beam_on()
     RE.resume()
-    beam_off()
+    #beam_off()
     ### end data acquisition
     a=RE.md.pop('exposure time')        # remove eiger series specific meta data (need better way to remove keys 'silently'....)
     a=RE.md.pop('acquire period')
@@ -539,6 +530,8 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
     auto_compression=False/True, True: add uid to document "general list" in collection "data_acquisition_collection" in database 'samples'
     database access is done in a 'try', to avoid errors in case of problems with database access	
     """
+    #timing delay between calling series and start of data acquisition:
+    #caput('XF:11ID-CT{ES:1}bo2',1)
     print('start of series: '+time.ctime())
     if acqp=='auto':
         acqp=expt
@@ -689,7 +682,7 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
         #detlist=[detector,OAV] ## NOT saving...for debugging only
         org_pt=caget('XF:11IDB-BI{Cam:10}cam1:AcquirePeriod_RBV')
         org_ni=caget('XF:11IDB-BI{Cam:10}cam1:NumImages_RBV')
-        caput('XF:11IDB-BI{Cam:10}cam1:NumImages',1,wait=True)
+        caput('XF:11IDB-BI{Cam:10}cam1:NumImages',2,wait=True)  ## if switching on light, first image will be dark
     elif OAV_mode == 'start_end':
         detlist=[detector,OAV_writing] 
         #detlist=[detector,OAV] ## NOT saving...for debugging only
