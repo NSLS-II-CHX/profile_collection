@@ -16,6 +16,8 @@ print('\n available collection in database samples:')
 print(cli.samples.collection_names())
 
 
+
+
 def update_beamline_pos(position_key='none',interactive=True):
     #### NEEDS UPDATE FOR REAL IMPLEMENTATION!!!
     # complication: some motors are defined as e.g. diff.yh (usually stepper motors)
@@ -272,12 +274,13 @@ def acquisition_from_database(acquisition_database_obid,error_mode='try',focus_c
                                 uid=db[-1]['start']['uid']
                                 #for ics in tqdm(range(100)):
                                 #    time.sleep(.1)
-                                # add uid to database for compression:
+                                # add uid to database for compression [can be done by 'series()' in the future]:
                                 uid_list=data_acquisition_collection.find_one({'_id':'general_list'})['uid_list']
-                                sample_uidlist=samples_2.find_one({'_id':data_acq_dict[i]['sample_id']})['info']['uids']
-                                uid_list.append(uid);sample_uidlist.append(uid)
+                                uid_list.append(uid)
                                 data_acquisition_collection.update_one({'_id': 'general_list'},{'$set':{'uid_list' : uid_list}})
                                 # add uid to sample database:
+                                sample_uidlist=samples_2.find_one({'_id':data_acq_dict[i]['sample_id']})['info']['uids']
+                                sample_uidlist.append(uid)
                                 samples_2.update_one({'_id': data_acq_dict[i]['sample_id']},{'$set':{'info.uids' : sample_uidlist}})
 
                             elif data_acq_dict[i]['acq_list'][m][0] == 'T_ramp':
@@ -294,7 +297,7 @@ def acquisition_from_database(acquisition_database_obid,error_mode='try',focus_c
                             data_acquisition_collection.update_one({'_id':obid},{'$set':{i+'.acq_completed' : acq_completed_list}})
 
                         else:
-                            print(bcolors.Fail+'Task '+str(data_acq_dict[i]['acq_list'][m])+' has been previously completed: skip!'+bcolors.ENDC)
+                            print(bcolors.FAIL+'Task '+str(data_acq_dict[i]['acq_list'][m])+' has been previously completed: skip!'+bcolors.ENDC)
 
                 # clean up: remove metadata
                 for q in list(RE.md.keys()):
