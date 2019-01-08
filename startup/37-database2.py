@@ -336,7 +336,7 @@ def acquisition_from_database(acquisition_database_obid,error_mode='try',focus_c
                             data_acquisition_collection.update_one({'_id':obid},{'$set':{i+'.acq_completed' : acq_completed_list}})
 
                         else:
-                            print(bcolors.Fail+'Task '+str(data_acq_dict[i]['acq_list'][m])+' has been previously completed: skip!'+bcolors.ENDC)
+                            print(bcolors.FAIL+'Task '+str(data_acq_dict[i]['acq_list'][m])+' has been previously completed: skip!'+bcolors.ENDC)
 
                 # clean up: remove metadata
                 for q in list(RE.md.keys()):
