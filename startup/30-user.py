@@ -725,7 +725,7 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
         print('uid not added to database for automatic compression')
     ###############################################################################
     # remove series specific keys from general metadata:
-    for ke in ['exposure time','acquire period','shutter mode','number of images','sequence id','T_yoke','T_sample','feedback_x','feedback_y','transmission','OAV_mode','analysis']:
+    for ke in ['exposure time','acquire period','shutter mode','number of images','sequence id','T_yoke','T_sample','feedback_x','feedback_y','transmission','OAV_mode','analysis', 'data path']:
     	del RE.md[ke]
 
 
