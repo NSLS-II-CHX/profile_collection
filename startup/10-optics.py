@@ -238,7 +238,8 @@ dcm = DCM('XF:11IDA-OP{Mono:DCM', name='dcm') #, check position, e.g., by dcm.b.
 dmm = DMM('XF:11IDA-OP{Mono:DMM', name='dmm')
 mbs = VirtualMotorSlits('XF:11IDA-OP{Slt:MB', name='mbs')  # Mono-beam Slits, check position, e.g., by mbs.xc.readback.value
 tran= Transfocator('XF:11IDA-OP{Lens:', name='tran')    # Transfocator
-s4 = MotorCenterAndGap('XF:11IDB-ES{Slt:4', name='s4')  # temp guard slits
+s3 = MotorCenterAndGap('XF:11IDB-ES{Slt:3', name='s3')  # diff s4 slit  (upstream)
+s4 = MotorCenterAndGap('XF:11IDB-ES{Slt:4', name='s4')  # diff s4 slit  (downstream)
 fsh_x=EpicsMotor('XF:11IDB-OP{FS:1-Ax:X}Mtr', name='fsh_x')  # fast shutter positioner: X
 fsh_y=EpicsMotor('XF:11IDB-OP{FS:1-Ax:Y}Mtr', name='fsh_y')  # fast shutter positioner: Y
 #smp =SmarPod('XF:11IDB-ES{SPod:1-',name='smp')    # SmarPod

@@ -742,8 +742,8 @@ def set_temperature(Tsetpoint,heat_ramp=3,cool_ramp=0,log_entry='on'):       # M
     cool_ramp: ramping speed [deg.C/min] on cooling. '0' -> ramp off!
     log_entry: 'on' / 'off'  -> make olog entry when changing temperature ('try', ignored, if Olog is down...)
     """
-    if heat_ramp > 5.:
-        heat_ramp=5.
+    if heat_ramp > 7.:
+        heat_ramp=7.
     else: pass
     if cool_ramp==0:
         cool_ramp_on=0
