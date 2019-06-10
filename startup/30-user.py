@@ -509,8 +509,54 @@ def prep_series_feedback():
     caput('XF:11IDB-BI{XBPM:02}Fdbk:AEn-SP',1)   
     #RE(mv(bpm2_feedback_selector_a, 1))
     
+def wait_for_pv(dets, ready_signal, md=None):
+    if md is None:
+        md = {}
+    def still_waiting():
+        return ready_signal.value != 1        
+    def wait_for_motor_to_cross_threshold():
+        return motor.postion < threshold
+    @bpp.stage_decorator(dets)
+    @bpp.run_decorator(md=md)
+    def inner():
+        print('waiting for trigger signal (PV)...')
+        while still_waiting():
+            yield from bps.sleep(.01)
+        yield from bps.trigger_and_read(dets)        
+    yield from inner()
+    
+    
+    
+    
+    
+
+def wait_for_motor(dets, motor, target, threshold, start_move=False, md=None): 
+     if md is None: 
+         md = {} 
+          
+     def still_waiting(): 
+         p = motor.position 
+         #print(np.abs(p-target)<threshold) 
+         return np.abs(p-target) > threshold 
+  
+     @bpp.stage_decorator(dets) 
+     @bpp.run_decorator(md=md)
+     def inner():
+         print('waiting for %s to reach %s within threshold of %s'%(motor.name,target,threshold))
+         if start_move:
+             yield from bps.abs_set(motor, target, group='the_motor') 
+         while still_waiting(): 
+             yield from bps.sleep(.1) 
+         yield from bps.trigger_and_read(dets) 
+         yield from bps.wait(group='the_motor') 
+     yield from inner() 
+
+    
+
+    
+    
 # Lutz's test Nov 08 start
-def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comment='', feedback_on=False, analysis='', use_xbpm=False, OAV_mode='none',auto_compression=False):
+def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comment='', feedback_on=False, PV_trigger=False, position_trigger=False ,analysis='', use_xbpm=False, OAV_mode='none',auto_compression=False):
     """
     det='eiger1m' / 'eiger4m' / 'eiger500k'
     shutter_mode='single' / 'multi'
@@ -528,10 +574,21 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
     03/26/2018: added hook 'analysis' for jupyter pipeline
     10/27/2018: added option to add acquired uid to list for automatic compression:
     auto_compression=False/True, True: add uid to document "general list" in collection "data_acquisition_collection" in database 'samples'
-    database access is done in a 'try', to avoid errors in case of problems with database access	
+    database access is done in a 'try', to avoid errors in case of problems with database access
+    06/03/2019: added trigger via external PV or motor position, with pre-staging of detectors
+    PV_trigger = False -> previous behavior, PV_trigger = True: write metadata, stage detector(s), wait for PV trigger signal
+    position_trigger = False -> previous behavior
+    position_trigger={'motor':diff.xh,'target':-.2,'threshold':.1,'start_move':False} -> trigger when motor position within threshold,
+    start_move=False -> don't move motor from series, start_move=True: move motor from series
     """
     #timing delay between calling series and start of data acquisition:
     #caput('XF:11ID-CT{ES:1}bo2',1)
+    trigger_pv='XF:11ID-CT{ES:1}bi3'
+    trigger_PV=EpicsSignal('XF:11ID-CT{ES:1}bi3',name='trigger_PV')
+    
+    if PV_trigger and position_trigger:
+      raise series_Exception('error: Cannot trigger both at PV signal and motor position -> chose one!')
+    
     print('start of series: '+time.ctime())
     if acqp=='auto':
         acqp=expt
@@ -706,7 +763,14 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
     if feedback_on:
         RE(prep_series_feedback())
     #RE(count([detector]),Measurement=comment)  ### ACQUISITION
-    RE(count(detlist),Measurement=comment)  ### testing camera images taken simultaneously
+    if PV_trigger:
+      dets = detlist      
+      RE(wait_for_pv(dets,trigger_PV,md=RE.md),Measurement=comment)
+    elif position_trigger:
+      dets = detlist
+      RE(wait_for_motor(dets, position_trigger['motor'], position_trigger['target'], position_trigger['threshold'],start_move=position_trigger['start_move'],  md=RE.md),Measurement=comment) 
+    else:
+      RE(count(detlist),Measurement=comment)  ### testing camera images taken simultaneously
     # setting image number and period back for OAV camera:
     if OAV_mode != 'none':      ####! OAV !!!!!
         caput('XF:11IDB-BI{Cam:10}cam1:NumImages',org_ni)
@@ -732,6 +796,8 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
 
 class series_Exception(Exception):
     pass
+  
+  
 # heating with sample chamber, using both heaters:
 def set_temperature(Tsetpoint,heat_ramp=3,cool_ramp=0,log_entry='on'):       # MADE MAJOR CHANGES: NEEDS TESTING!!! [01/23/2017 LW]
     """
@@ -1255,6 +1321,42 @@ def WAXS_rotation(angle):
 
 class rotation_exception(Exception):
     pass
+    
+#def wait_for_pv(dets, ready_signal, md=None):
+#    if md is None:
+#        md = {}
+#    def still_waiting():
+#        return ready_signal.value != 1
+#        
+#    def wait_for_motor_to_cross_threshold():
+#        return motor.postion < threshold
+
+#    @bpp.stage_decorator(dets)
+#    @bpp.run_decorator(md=md)
+#    def inner():
+
+#        while still_waiting():
+#            yield from bps.sleep(.1)
+#        yield from bps.trigger_and_read(dets)
+        
+#    yield from inner()
+
+#def wait_for_motor(dets, motor, md=None):
+#    if md is None:
+#        md = {}
+        
+#    def still_waiting():
+#        return motor.postion < threshold
+
+#    @bpp.stage_decorator(dets)
+#    @bpp.run_decorator(md=md)
+#    def inner():
+
+#        while still_waiting():
+#            yield from bps.sleep(.1)
+#        yield from bps.trigger_and_read(dets)
+        
+#    yield from inner()
 
 #Amplifier stage - J.Lhermitte et al.
 #amp_x = EpicsMotor('XF:11IDB-OP{BS:Samp-Ax:X}Mtr', name='amp_x')
