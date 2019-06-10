@@ -21,6 +21,8 @@ ivu_gap = InsertionDevice('SR:C11-ID:G1{IVU20:1', name='ivu')
 # ivu_gap.readback = 'ivu_gap'   ####what the ^*(*()**)(* !!!!
 #To solve the "KeyError Problem" when doing dscan and trying to save to a spec file, Y.G., 20170110
 ivu_gap.gap.name = 'ivu_gap'
-
+ivu_gap.gap.parent.name='ivu_gap' 
 # This class is defined in 10-optics.py
 fe = VirtualMotorCenterAndGap('FE:C11A-OP{Slt:12', name='fe') # Front End Slits (Primary Slits)
+
+
