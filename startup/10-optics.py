@@ -45,6 +45,13 @@ class VirtualMotorCenterAndGap(Device):
     yc = Cpt(VirtualCenter, '-Ax:Y}')
     xg = Cpt(VirtualGap, '-Ax:X}')
     yg = Cpt(VirtualGap, '-Ax:Y}')
+    @property
+    def hints(self):
+        fields = []
+        for name in self.component_names:
+            motor = getattr(self, name)
+            fields.extend(motor.hints['fields'])
+        return {'fields': fields}    
 
 
 class Blades(Device):
@@ -231,7 +238,7 @@ s1 = MotorCenterAndGap('XF:11IDB-OP{Slt:1', name='s1')
 k1 = Kinoform('XF:11IDB-OP{Lens:1', name='k1')  # upstream
 k2 = Kinoform('XF:11IDB-OP{Lens:2', name='k2')  # downstream
 gi = XYThetaMotor('XF:11IDB-OP{Mir:GI', name='gi')  # GI-mirror
-s2 = MotorCenterAndGap('XF:11IDB-OP{Slt:2', name='s2') #Beam-defining (large JJ) slits
+#s2 = MotorCenterAndGap('XF:11IDB-OP{Slt:2', name='s2') #Beam-defining (large JJ) slits -> replaced by new custom slit
 pbs = MotorSlits('XF:11IDA-OP{Slt:PB', name='pbs')  # pink beam slits
 flt_y = EpicsMotor('XF:11IDA-OP{Flt:1-Ax:Y}Mtr', name='flt_y')  # filters
 dcm = DCM('XF:11IDA-OP{Mono:DCM', name='dcm') #, check position, e.g., by dcm.b.user_readback.value
@@ -276,8 +283,14 @@ bpm2 = XYMotor('XF:11IDB-BI{BPM:2', name='bpm2')
 
 w1 = XYMotor('XF:11IDB-OP{Win:1', name='w1')  # window positioners
 hdm = HorizontalDiffractionMirror('XF:11IDA-OP{Mir:HDM', name='hdm')
+s2=VirtualMotorSlits('XF:11IDB-OP{Slt:BDS', name='s2')  #new beam defining slit (based on SmarAct)
 gsl = VirtualMotorCenterAndGap('XF:11IDB-OP{Slt:Guard', name='gsl')  #Guard rSlits (SmarAct)
 #gsl = VirtualMotorSlits('XF:11IDB-OP{Slt:Guard', name='gsl')  #Guard rSlits (SmarAct)
+
+s2.xc.readback.name = 's2_xc'
+s2.yc.readback.name = 's2_yc'
+s2.xg.readback.name = 's2_xg'
+s2.yg.readback.name = 's2_yg'
 
 
 
