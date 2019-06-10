@@ -46,6 +46,34 @@ acquire  time: TODO
 
 
 #single_motor_template = """{{- start.plan_name}} :  {{ start.motors[0]}} {{start.plan_args.start}} {{start.plan_args.stop}} {{start.plan_args.num}} ['{{ start.uid[:6] }}'] (scan num: {{ start.scan_id }})
+
+ 
+
+wait_for_pv_template = """{{- start.plan_name}} :  ['{{ start.uid[:8] }}'] (scan num: {{ start.scan_id }}) (Measurement: {{start.Measurement}} )
+
+
+Scan Plan
+---------
+{{ start.plan_type }}
+{%- for k, v in start.plan_args | dictsort %}
+    {{ k }}: {{ v }}
+{%-  endfor %}
+{% if 'signature' in start -%}
+Call:
+    {{ start.signature }}
+{% endif %}
+Metadata
+--------
+{% for k, v in start.items() -%}
+{%- if k not in ['plan_type', 'plan_args'] -%}{{ k }} : {{ v }}
+{% endif -%}
+
+
+{%- endfor -%}
+
+
+"""
+
 single_motor_template = """{{- start.plan_name}} :  {{ start.motors[0]}}  {{'%0.3f' %start.plan_args.start|float}}    {{'%0.3f' %start.plan_args.stop|float}} {{start.plan_args.num}} ['{{ start.uid[:6] }}'] (scan num: {{ start.scan_id }})
 
 
@@ -83,6 +111,9 @@ TEMPLATES['manual_count'] = manual_count_template
 TEMPLATES['dscan'] = single_motor_template
 TEMPLATES['ascan'] = single_motor_template
 TEMPLATES['ID_calibration'] = single_motor_template
+#TEMPLATES['wait_for_motor'] = count_template
+
+TEMPLATES['wait_for_pv'] =  wait_for_pv_template   #
 
 from jinja2 import Template
 
