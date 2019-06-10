@@ -464,7 +464,7 @@ def plot_reflectivity(db_si,db_rh):
 	en_r=xf.get_EBragg('Si111cryo',-si_dat.dcm_b)
 	plt.figure(19)
 	plt.semilogy(en_r,si_dat.elm_sum_all/rh_dat.elm_sum_all,label='measured')
-	plt.hold(True)
+	#plt.hold(True)
 	r_eng=np.array(np.loadtxt("/home/xf11id/Downloads/R_Rh_0p180.txt"))[:,0]/1e3
 	rsi_0p18=np.array(np.loadtxt("/home/xf11id/Downloads/R_Si_0p180.txt"))[:,1]
 	rrh_0p18=np.array(np.loadtxt("/home/xf11id/Downloads/R_Rh_0p180.txt"))[:,1]

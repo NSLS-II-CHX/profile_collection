@@ -225,7 +225,7 @@ def calibration_mca( mca  ):
 
 
 #one example:
-#det = [mac]    
+#det = [mca]    
 #RE(count(det))
 
 

@@ -265,7 +265,7 @@ import suitcase.spec
 #specpath = os.path.expanduser('/home/xf11id/specfiles/chx_spec_2017_06_22.spec')
 #specpath = os.path.expanduser('/home/xf11id/specfiles/chx_spec_2017_11_28.spec')
 specpath = os.path.expanduser('/home/xf11id/specfiles/chx_spec_2018_09_17.spec')
-
+specpath = os.path.expanduser('/home/xf11id/specfiles/chx_spec_2019_04_30.spec')
 #spec_cb = DocumentToSpec('/home/xf11id/specfiles/testing.spec')
 spec_cb = DocumentToSpec(specpath)
 spec_cb.resource = lambda *x: None
@@ -273,6 +273,20 @@ spec_cb.datum = lambda *x: None
 
 
 RE.subscribe(spec_cb)
+
+def new_spec_file(name):
+    """
+    set new specfile name:
+    - path is fixed at /home/xf11id/specfiles/
+    - name= xyz .spec will be added automatically
+    calling sequence: new_spec_file(name='xyz')
+    """
+    full_path='/home/xf11id/specfiles/'+name+'.spec'
+    specpath = os.path.expanduser(fullpath)
+    spec_cb = DocumentToSpec(specpath)
+    spec_cb.resource = lambda *x: None
+    spec_cb.datum = lambda *x: None
+    print('Using new spec-file: ',fullpath)
  
 
 def reload_macro(filename):
