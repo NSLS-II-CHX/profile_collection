@@ -106,15 +106,13 @@ class StandardProsilicaWithTIFF(StandardProsilica):
     tiff = Cpt(TIFFPluginWithFileStore,
                suffix='TIFF1:',
                write_path_template='/nsls2/xf11id1/data/%Y/%m/%d/',
-               root='/nsls2/xf11id1/data',
-               reg=db.reg)
+               root='/nsls2/xf11id1/data')
 
 class StandardProsilicaWithTIFFV33(StandardProsilicaV33):
     tiff = Cpt(TIFFPluginWithFileStore,
                suffix='TIFF1:',
                write_path_template='/XF11ID/data/%Y/%m/%d/',
-               root='/XF11ID/data',
-               reg=db.reg)
+               root='/XF11ID/data')
 
 class EigerSimulatedFilePlugin(Device, FileStoreBase):
     sequence_id = ADComponent(EpicsSignalRO, 'SequenceId')
@@ -170,8 +168,7 @@ class EigerBase(AreaDetector):
                #write_path_template='/XF11ID/data/%Y/%m/%d/',
                write_path_template='/nsls2/xf11id1/data/%Y/%m/%d/',
                #root='/XF11ID/',
-               root='/nsls2/xf11id1/',
-               reg=db.reg)
+               root='/nsls2/xf11id1/')
     beam_center_x = ADComponent(EpicsSignalWithRBV, 'cam1:BeamX')
     beam_center_y = ADComponent(EpicsSignalWithRBV, 'cam1:BeamY')
     wavelength = ADComponent(EpicsSignalWithRBV, 'cam1:Wavelength')

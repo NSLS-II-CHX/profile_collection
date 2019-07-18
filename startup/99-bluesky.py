@@ -252,9 +252,12 @@ def relabel_figure(fig, new_title):
     fig.canvas.manager.window.setWindowTitle(new_title)
     
 
-
-from suitcase.spec import DocumentToSpec
-import suitcase.spec
+from suitcase.utils import MultiFileManager
+from suitcase.specfile import Serializer
+from event_model import RunRouter
+import event_model
+from pathlib import Path
+import suitcase.specfile
 
 # Monkey-patch module globals.
 #suitcase.spec._SCANS_WITHOUT_MOTORS.extend(['count'])
@@ -264,15 +267,52 @@ import suitcase.spec
 
 #specpath = os.path.expanduser('/home/xf11id/specfiles/chx_spec_2017_06_22.spec')
 #specpath = os.path.expanduser('/home/xf11id/specfiles/chx_spec_2017_11_28.spec')
-specpath = os.path.expanduser('/home/xf11id/specfiles/chx_spec_2018_09_17.spec')
-specpath = os.path.expanduser('/home/xf11id/specfiles/chx_spec_2019_04_30.spec')
+#specpath = os.path.expanduser('/home/xf11id/specfiles/chx_spec_2018_09_17.spec')
+#specpath = os.path.expanduser('/home/xf11id/specfiles/chx_spec_2019_04_30.spec')
 #spec_cb = DocumentToSpec('/home/xf11id/specfiles/testing.spec')
-spec_cb = DocumentToSpec(specpath)
-spec_cb.resource = lambda *x: None
-spec_cb.datum = lambda *x: None
 
 
-RE.subscribe(spec_cb)
+class MultiFileManagerHack(MultiFileManager):
+
+    def open(self, label, postfix, mode, **kwargs):
+        mode = 'a' if mode=='x' else mode
+        f = super().open(label, postfix, mode, **kwargs)
+        return f
+
+    def reserve_name(self, label, postfix):
+        name = (self._directory / Path(postfix)).expanduser().resolve()
+        if name in self._reserved_names:
+            return name
+        return super().reserve_name(label, postfix)
+
+
+class SerializerHack(Serializer):
+    
+    def event_page(self, doc):
+        for event in event_model.unpack_event_page(doc):
+            self.event(event)
+        return doc
+
+    def event(self, doc):
+        doc = super().event(doc)
+        self._file.flush()
+        return doc
+
+
+directory = '/home/xf11id/specfiles/'
+prefix = 'chx_spec_2019_07_18'
+
+
+def spec_factory(name, doc):
+    spec_cb = SerializerHack(MultiFileManagerHack(directory, allowed_modes=('x','a')),
+                     file_prefix=prefix)
+    spec_cb(name, doc)
+    return [spec_cb], []
+
+
+run_router = RunRouter([spec_factory])
+
+RE.subscribe(run_router)
 
 def new_spec_file(name):
     """
@@ -283,7 +323,7 @@ def new_spec_file(name):
     """
     full_path='/home/xf11id/specfiles/'+name+'.spec'
     specpath = os.path.expanduser(fullpath)
-    spec_cb = DocumentToSpec(specpath)
+    spec_cb = Serializer(directory, file_prefix=prefix)
     spec_cb.resource = lambda *x: None
     spec_cb.datum = lambda *x: None
     print('Using new spec-file: ',fullpath)
