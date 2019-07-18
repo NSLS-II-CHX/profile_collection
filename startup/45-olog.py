@@ -18,7 +18,7 @@ manual_count_template =  """{{- start.plan_name }} ['{{ start.uid[:8] }}'] (scan
 
  
 
-count_template = """{{- start.plan_name}} :  {{start.plan_args.num}} ['{{ start.uid[:8] }}'] (scan num: {{ start.scan_id }}) (Measurement: {{start.Measurement}} )
+count_template_old = """{{- start.plan_name}} :  {{start.plan_args.num}} ['{{ start.uid[:8] }}'] (scan num: {{ start.scan_id }}) (Measurement: {{start.Measurement}} )
 
 
 Scan Plan
@@ -44,6 +44,25 @@ acquire  time: TODO
 
 """
 
+count_template = """{{- start.plan_name}} :  {{start.plan_args.num}} ['{{ start.uid[:8] }}'] (scan num: {{ start.scan_id }}) (Measurement: {{start.Measurement}} )
+
+
+Scan Plan
+---------
+{{ start.plan_type }}
+
+Metadata
+--------
+{% for k, v in start.items() -%}
+{%- if k not in ['plan_type', 'plan_args'] -%}{{ k }} : {{ v }}
+{% endif -%}
+
+
+{%- endfor -%}
+exposure time: TODO 
+acquire  time: TODO 
+
+"""
 
 #single_motor_template = """{{- start.plan_name}} :  {{ start.motors[0]}} {{start.plan_args.start}} {{start.plan_args.stop}} {{start.plan_args.num}} ['{{ start.uid[:6] }}'] (scan num: {{ start.scan_id }})
 
@@ -54,14 +73,9 @@ wait_for_pv_template = """{{- start.plan_name}} :  ['{{ start.uid[:8] }}'] (scan
 
 Scan Plan
 ---------
-{{ start.plan_type }}
-{%- for k, v in start.plan_args | dictsort %}
-    {{ k }}: {{ v }}
-{%-  endfor %}
-{% if 'signature' in start -%}
-Call:
-    {{ start.signature }}
-{% endif %}
+'wait for pv'
+
+
 Metadata
 --------
 {% for k, v in start.items() -%}
@@ -76,9 +90,6 @@ Metadata
 
 single_motor_template = """{{- start.plan_name}} :  {{ start.motors[0]}}  {{'%0.3f' %start.plan_args.start|float}}    {{'%0.3f' %start.plan_args.stop|float}} {{start.plan_args.num}} ['{{ start.uid[:6] }}'] (scan num: {{ start.scan_id }})
 
-
-
-
 Scan Plan
 ---------
 {{ start.plan_type }}
@@ -102,6 +113,9 @@ acquire  time: TODO
 
 """
 
+
+
+
 TEMPLATES = defaultdict(lambda: simple_template)
 TEMPLATES['ct'] = count_template
 TEMPLATES['count'] = count_template
@@ -111,9 +125,9 @@ TEMPLATES['manual_count'] = manual_count_template
 TEMPLATES['dscan'] = single_motor_template
 TEMPLATES['ascan'] = single_motor_template
 TEMPLATES['ID_calibration'] = single_motor_template
-#TEMPLATES['wait_for_motor'] = count_template
 
-TEMPLATES['wait_for_pv'] =  wait_for_pv_template   #
+TEMPLATES['wait_for_motor'] =  wait_for_pv_template
+TEMPLATES['wait_for_pv'] =  wait_for_pv_template  #simple_template  #  wait_for_pv_template   #
 
 from jinja2 import Template
 
@@ -134,15 +148,15 @@ configured_logbook_func = partial(generic_logbook_func, logbooks=LOGBOOKS)
 # This is for ophyd.commands.get_logbook, which simply looks for
 # a variable called 'logbook' in the global IPython namespace.
 logbook = simple_olog_client
-
-
 logbook_cb = logbook_cb_factory(configured_logbook_func, desc_dispatch=TEMPLATES)
+
 
 def submit_to_olog(queue, cb):
     while True:
         name, doc = queue.get()  # waits until document is available
         try:
             cb(name, doc)
+            print('here')
         except Exception as exc:
             warn('This olog is giving errors. This will not be logged.'
                  'Error:' + str(exc))
@@ -158,3 +172,7 @@ def send_to_olog_queue(name, doc):
         warn('The olog queue is full. This will not be logged.')
 
 RE.subscribe(send_to_olog_queue, 'start')
+
+
+
+

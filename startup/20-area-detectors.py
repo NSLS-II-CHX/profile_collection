@@ -384,11 +384,13 @@ xray_eye2 = StandardProsilicaV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
 xray_eye3 = StandardProsilicaV33('XF:11IDB-BI{Cam:08}', name='xray_eye3')
 xray_eye4 = StandardProsilicaV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
 OAV = StandardProsilicaV33('XF:11IDB-BI{Cam:10}', name='OAV')
+BCam =  StandardProsilicaV33('XF:11IDB-ES{BFLY-Cam:1}', name='BCam')  
 xray_eye1_writing = StandardProsilicaWithTIFFV33('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye1')
 xray_eye2_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
 xray_eye3_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:08}', name='xray_eye3')
 xray_eye4_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
 OAV_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:10}', name='OAV')
+BCam_writing =  StandardProsilicaWithTIFFV33('XF:11IDB-ES{BFLY-Cam:1}', name='BCam') 
 fs1 = StandardProsilicaV33('XF:11IDA-BI{FS:1-Cam:1}', name='fs1')
 fs2 = StandardProsilicaV33('XF:11IDA-BI{FS:2-Cam:1}', name='fs2')
 fs_wbs = StandardProsilicaV33('XF:11IDA-BI{BS:WB-Cam:1}', name='fs_wbs')
@@ -399,7 +401,8 @@ fs_pbs = StandardProsilicaV33('XF:11IDA-BI{BS:PB-Cam:1}', name='fs_pbs')
 all_standard_pros = [xray_eye1, xray_eye2, xray_eye3, xray_eye4,
                      xray_eye1_writing, xray_eye2_writing,
                      xray_eye3_writing, xray_eye4_writing, OAV, OAV_writing, fs1, fs2,
-                     fs_wbs, fs_pbs]
+                     fs_wbs, fs_pbs,    #BCam, BCam_writing, 
+                     ]
 #                     xray_eye3_writing, fs1, fs2, dcm_cam, fs_wbs, fs_pbs]
 for camera in all_standard_pros:
     camera.read_attrs = ['stats1', 'stats2', 'stats3', 'stats4', 'stats5']
@@ -415,10 +418,9 @@ for camera in all_standard_pros:
 
     #The following line should only be used when running AD V33
     camera.cam.ensure_nonblocking()
-
     camera.stage_sigs[camera.cam.trigger_mode] = 'Fixed Rate'
 
-for camera in [xray_eye1_writing, xray_eye2_writing,
+for camera in [xray_eye1_writing, xray_eye2_writing,  BCam, BCam_writing,
                xray_eye3_writing, xray_eye4_writing, OAV_writing]:
     camera.read_attrs.append('tiff')
     camera.tiff.read_attrs = []

@@ -908,7 +908,7 @@ def wait_temperature(wait_time=1200,dead_band=1.,channel=1,log_entry='on'):
     # initial wait for reaching setpoint temperature
     dT=T_set-caget(ch[ch_num])
     while abs(dT)>2*dead_band:
-        RE(sleep(min([abs(dtime)*60,300])))        # get an update after max 5 minutes...
+        RE(sleep(min([abs(dtime)*60,60])))        # get an update after max 1 minute...
         dtime=(T_set-caget(ch[ch_num]))/(abs(get_T_gradient(channel))+.1)
         dT=T_set-caget(ch[ch_num])  #why was this commented??
         print(time.ctime()+ '       updated estimate to reach T='+str(T_set)[:5]+'C on channel '+caget('XF:11IDB-ES{Env:01-Out:1}Out-Sel','char')+': '+str(dtime)[:5]+' minutes    current temperature: '+str(caget(ch[ch_num]))[:5]+'C')
@@ -937,15 +937,24 @@ def get_T_stability(wait_time,channel,dead_band):
     -> yes: returns 1 | no: returns 0
     """
     ch=['none','XF:11IDB-ES{Env:01-Chan:A}T:C-I','XF:11IDB-ES{Env:01-Chan:B}T:C-I','XF:11IDB-ES{Env:01-Chan:C}T:C-I','XF:11IDB-ES{Env:01-Chan:D}T:C-I']
-    ch_num=caget('XF:11IDB-ES{Env:01-Out:'+str(channel)+'}Out-Sel')    
-    temperatures=np.zeros(int(wait_time/5))
-    for i in range(int(wait_time/5)):
+    ch_num=caget('XF:11IDB-ES{Env:01-Out:'+str(channel)+'}Out-Sel')
+    if int(wait_time/5) >=1:
+      temperatures=np.zeros(int(wait_time/5))
+      for i in range(int(wait_time/5)):
         RE(sleep(1))
         temperatures[i]=caget(ch[ch_num])-(caget('XF:11IDB-ES{Env:01-Out:'+str(channel)+'}T-SP') - 273.15)
-    if max(abs(temperatures))>dead_band:
-        T_stability_pass=0
-    elif max(abs(temperatures))<=dead_band:
-        T_stability_pass=1
+        if max(abs(temperatures))>dead_band:
+          T_stability_pass=0
+        elif max(abs(temperatures))<=dead_band:
+          T_stability_pass=1
+    else:
+        RE(sleep(1))
+        temperatures=caget(ch[ch_num])-(caget('XF:11IDB-ES{Env:01-Out:'+str(channel)+'}T-SP') - 273.15)
+        print(temperatures)
+        if temperatures>dead_band:
+          T_stability_pass=0
+        elif temperatures<=dead_band:
+          T_stability_pass=1
     return T_stability_pass
     
     
