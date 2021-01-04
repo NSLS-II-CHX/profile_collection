@@ -239,6 +239,21 @@ class EigerBaseV33(EigerBase):
     stats4 = Cpt(StatsPluginV33, 'Stats4:')
     stats5 = Cpt(StatsPluginV33, 'Stats5:')
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._plugins_to_enable_or_disable = \
+                [f'roi{i}' for i in range(1, 4+1)] + \  # roi1..4
+                [f'stats{i}' for i in range(1, 5+1)] + \  # stats1..5
+                ['proc1', 'image']
+        self._plugins_stage_sigs = OrderedDict([('enable', 1),
+                                                ('blocking_callbacks', 'No'),
+                                                ('parent.cam.array_callbacks', 1)])
+
+    def enable_plugins(self, enable=True):
+        self._plugins_stage_sigs['enable'] = 1 if enable else 0
+        for cpt in self._plugins_to_enable_or_disable:
+            getattr(self, cpt).stage_sigs = self._plugins_stage_sigs
+
 
 class EigerSingleTrigger(SingleTrigger, EigerBase):
     def __init__(self, *args, **kwargs):
