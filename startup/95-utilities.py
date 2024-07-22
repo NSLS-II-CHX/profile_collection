@@ -122,7 +122,7 @@ def manage_metadata(action=None,verbose=True,**kwargs):
     backup_dict_path = '/home/xf11id/CHX_metadata_backups/'
     md_filename = 'CHX_md_backup_'
     # what to do with data session? what's the default?
-    keep_list = ['scan_id','cycle','sample','auto_pipeline','beam_position_dict','OAV_resolution [um_pixel]','data_session','beamline_id','owner','user','user_group']
+    keep_list = ['scan_id','cycle','sample','auto_pipeline','beam_position_dict','OAV_resolution [um_pixel]','data_session','beamline_id','owner','username','user_group','start_datetime', 'proposal']
     default_dict = {'sample':'none','auto_pipeline':'none','OAV_resolution [um_pixel]':'N.A.','user':'CHX_staff','user_group':[]}
     
     md_dict=dict(RE.md)
