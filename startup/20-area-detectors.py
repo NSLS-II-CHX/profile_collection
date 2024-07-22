@@ -142,6 +142,7 @@ class StandardProsilicaWithTIFFV33(StandardProsilicaV33):
 class EigerSimulatedFilePlugin(Device, FileStoreBase):
     sequence_id = ADComponent(EpicsSignalRO, 'SequenceId')
     file_path = ADComponent(EpicsSignalWithRBV, 'FilePath', string=True)
+    create_dir_depth = ADComponent(EpicsSignalWithRBV, "CreateDirectory")
     file_write_name_pattern = ADComponent(EpicsSignalWithRBV, 'FWNamePattern',
                                           string=True)
     file_write_images_per_file = ADComponent(EpicsSignalWithRBV,
@@ -160,6 +161,7 @@ class EigerSimulatedFilePlugin(Device, FileStoreBase):
 
     def stage(self):
         res_uid = new_short_uid()
+        self.create_dir_depth.set(-4).wait()
         write_path = datetime.now().strftime(self.write_path_template)
         #set_and_wait(self.file_path, write_path + '/')
         self.file_path.set(write_path + '/').wait()
@@ -709,6 +711,8 @@ eiger1m_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig1M}', name='eiger1m_sing
 set_eiger_defaults(eiger1m_manual)
 eiger1m_manual.file.write_path_template = '/nsls2/data/chx/assets/eiger1m/%Y/%m/%d/'
 eiger1m_manual.file.reg_root ='/nsls2/data/chx/assets/eiger1m/'
+#eiger1m_manual.file.write_path_template = f"/nsls2/data/chx/proposals/{RE.md['cycle']}/{RE.md['data_session']}/assets/eiger1m/%Y/%m/%d/"
+#eiger1m_manual.file.reg_root = f"/nsls2/data/chx/proposals/{RE.md['cycle']}/{RE.md['data_session']}/assets/eiger1m"
 
 try:
     eiger500k_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig500K}', name='eiger500k_single')

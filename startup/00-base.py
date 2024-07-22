@@ -1,5 +1,9 @@
 import nslsii
+import redis
+
 from bluesky import RunEngine
+from redis_json_dict import RedisJSONDict
+
 nslsii.configure_base(
     get_ipython().user_ns,
     'chx',
@@ -61,7 +65,13 @@ except ImportError:
 runengine_metadata_dir = appdirs.user_data_dir(appname="bluesky") / Path("runengine-metadata")
 
 # PersistentDict will create the directory if it does not exist
-RE.md = PersistentDict(runengine_metadata_dir)
+metadata = PersistentDict(runengine_metadata_dir)
+# metadata.drop("user_group")
+
+#RE.md.update(dict(RedisJSONDict(redis.Redis("info.chx.nsls2.bnl.gov"), prefix="")))
+#RE.md.pop("user_group")
+
+RE.md = RedisJSONDict(redis.Redis("info.chx.nsls2.bnl.gov"), prefix="")
 
 # send ophyd debug log to the console
 # import logging
