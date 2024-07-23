@@ -18,6 +18,7 @@ from matplotlib import pyplot as pltfrom
 from lmfit import  Model
 from lmfit import minimize, Parameters, Parameter, report_fit
 from scipy.special import erf
+import httpx
 
 from zoneinfo import ZoneInfo
 import json, re, os
@@ -70,6 +71,19 @@ def backup_md(md_dict,backup_dict_path,md_filename,verbose=False):
         json.dump(json.dumps(md_dict), outfile)
     if verbose:
         print('saved metadata backup file as ',json_filename)
+
+
+def get_user_list(proposal_number : int):
+    """Returns a list of usernames assigned to a given proposal
+
+    """
+
+    nslsii_api_client = httpx.Client(base_url="https://api.nsls2.bnl.gov")
+    proposal_response = nslsii_api_client.get(f"/v1/proposal/{proposal_number}").raise_for_status()
+    proposal_data = proposal_response.json()["proposal"]
+    user_list = [item.get('username') for item in proposal_data['users']]
+
+    return user_list
 
 def list_md_backups(backup_dict_path,md_filename,newest_first=True,max_number=None):
     """
