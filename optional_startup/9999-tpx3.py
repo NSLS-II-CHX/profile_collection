@@ -68,9 +68,10 @@ class Tpx3Files(Device):
 
     def stage(self):
         # TODO also do the images
-
+        
         self._res_uid = res_uid = new_short_uid()
-        write_path_template = 'file:/nsls2/data/chx/legacy/data/%Y/%m/%d/'
+        #write_path_template = 'file:/nsls2/data/chx/legacy/data/%Y/%m/%d/'
+        write_path_template = f"file:/nsls2/data/chx/proposals/{RE.md['cycle']}/{RE.md['data_session']}/assets/TPX3/%Y/%m/%d/"
         self._write_path = write_path = datetime.now().strftime(write_path_template)
         self.raw_filepath.set(write_path).wait()
 
@@ -85,8 +86,10 @@ class Tpx3Files(Device):
         self.update_file_template()
         # reset this back to 0!  
         self._n = 0
-
+        
         super().stage()
+
+
 
     def update_file_template(self):
         # The server generates files with in a trigger that are formatted as
@@ -107,7 +110,7 @@ class Tpx3Files(Device):
     def unstage(self) -> List[object]:
         # TODO reset these to their original values rather than junk
         self.raw_filepath.set('/does/not/exist/').wait()
-        self.raw_file_template.set(f"garbage").wait()
+        self.raw_file_template.set("garbage").wait()
         self.raw_write_enable.set(0).wait()
 
         # because we need to flush setting to actual server from IOC
@@ -115,11 +118,28 @@ class Tpx3Files(Device):
         return super().unstage()
 
 
+class Tpx3HDF(Device):
+    # Use the HDF5 plugin directory creation feature to avoid having to
+    # create directory creation logic for TPX FW explicitly.
+    hdf5_file_path = Cpt(EpicsSignalWithRBV, "FilePath", kind="omitted")
+    hdf5_create_directory = Cpt(EpicsSignalWithRBV, "CreateDirectory", kind="omitted")
+    
+    
+    def stage(self):
+         self.hdf5_create_directory.set(-4)
+         write_path_template = f"/nsls2/data/chx/proposals/{RE.md['cycle']}/{RE.md['data_session']}/assets/TPX3/%Y/%m/%d/"
+         write_path = datetime.now().strftime(write_path_template)
+         self.hdf5_file_path.put(write_path)
+
 class TimePixDetector(SingleTriggerV33, AreaDetector):
     _default_configuration_attrs = None
     _default_read_attrs = None
 
+    hdf_plugin = Cpt(Tpx3HDF, "HDF1:")
+
     files = Cpt(Tpx3Files, "cam1:")
+    
+
 
     stats1 = Cpt(StatsPlugin_V34, "Stats1:")
     stats2 = Cpt(StatsPlugin_V34, "Stats2:")
@@ -134,7 +154,14 @@ class TimePixDetector(SingleTriggerV33, AreaDetector):
     ts1 = Cpt(TimeSeriesPlugin_V34, "Stats1:TS:")
     ts2 = Cpt(TimeSeriesPlugin_V34, "Stats2:TS:")
     ts3 = Cpt(TimeSeriesPlugin_V34, "Stats3:TS:")
-    ts4 = Cpt(TimeSeriesPlugin_V34, "Stats4:TS:")    
+    ts4 = Cpt(TimeSeriesPlugin_V34, "Stats4:TS:")
+    
+    # def stage(self):
+    #     self.hdf5_create_directory.set(-4).wait()
+    #     write_path_template = f"/nsls2/data/chx/proposals/{RE.md['cycle']}/{RE.md['data_session']}/assets/TimePix3/%Y/%m/%d/"
+    #     write_path = datetime.now().strftime(write_path_template)
+    #     self.hdf5_file_path.set(write_path).wait()
+    #     self.files.stage()
 
     def trigger(self):
         self.files.update_file_template()
@@ -159,6 +186,7 @@ class TimePixDetector(SingleTriggerV33, AreaDetector):
         yield from bps.mv(self.cam.acquire_time, real_exp)
         yield from self.set_num_images(num_frames)            
 
+
 tpx3 = TimePixDetector("TPX3-TEST:", name="tpx3")
 
 for j in range(1, 5):
@@ -166,6 +194,7 @@ for j in range(1, 5):
     stat.kind = 'normal'
     stat.total.kind = 'hinted'
     stat.ts_total.kind = 'normal'
+
     
 for j in [1, 2, 3, 4]:
     getattr(tpx3, f'stats{j}').nd_array_port.set(f'ROI{j}')

@@ -142,6 +142,7 @@ class StandardProsilicaWithTIFFV33(StandardProsilicaV33):
 class EigerSimulatedFilePlugin(Device, FileStoreBase):
     sequence_id = ADComponent(EpicsSignalRO, 'SequenceId')
     file_path = ADComponent(EpicsSignalWithRBV, 'FilePath', string=True)
+    create_dir_depth = ADComponent(EpicsSignalWithRBV, "CreateDirectory")
     file_write_name_pattern = ADComponent(EpicsSignalWithRBV, 'FWNamePattern',
                                           string=True)
     file_write_images_per_file = ADComponent(EpicsSignalWithRBV,
@@ -160,6 +161,7 @@ class EigerSimulatedFilePlugin(Device, FileStoreBase):
 
     def stage(self):
         res_uid = new_short_uid()
+        self.create_dir_depth.set(-4).wait()
         write_path = datetime.now().strftime(self.write_path_template)
         #set_and_wait(self.file_path, write_path + '/')
         self.file_path.set(write_path + '/').wait()
@@ -522,15 +524,39 @@ OAV = StandardProsilicaV33('XF:11IDB-BI{Cam:10}', name='OAV')  # beamline OAV us
 
 
 BCam =  StandardProsilicaV33('XF:11IDB-ES{BFLY-Cam:1}', name='BCam')
+BCam.tiff.write_path_template = assets_path + f'{BCam.name}/%Y/%m/%d/'
+BCam.tiff.read_path_template = assets_path + f'{BCam.name}/%Y/%m/%d/'
+BCam.tiff.reg_root = assets_path
+
 xray_eye1_writing = StandardProsilicaWithTIFFV33('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye1')
+xray_eye1_writing.tiff.write_path_template = assets_path + f'{xray_eye1_writing.name}/%Y/%m/%d/'
+xray_eye1_writing.tiff.read_path_template = assets_path + f'{xray_eye1_writing.name}/%Y/%m/%d/'
+xray_eye1_writing.tiff.reg_root = assets_path
+
 xray_eye2_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
+xray_eye2_writing.tiff.write_path_template = assets_path + f'{xray_eye2_writing.name}/%Y/%m/%d/'
+xray_eye2_writing.tiff.read_path_template = assets_path + f'{xray_eye2_writing.name}/%Y/%m/%d/'
+xray_eye2_writing.tiff.reg_root = assets_path
+
 xray_eye3_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:08}', name='xray_eye3')
+xray_eye3_writing.tiff.write_path_template = assets_path + f'{xray_eye3_writing.name}/%Y/%m/%d/'
+xray_eye3_writing.tiff.read_path_template = assets_path + f'{xray_eye3_writing.name}/%Y/%m/%d/'
+xray_eye3_writing.tiff.reg_root = assets_path
+
 xray_eye4_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
+xray_eye4_writing.tiff.write_path_template = assets_path + f'{xray_eye4_writing.name}/%Y/%m/%d/'
+xray_eye4_writing.tiff.read_path_template = assets_path + f'{xray_eye4_writing.name}/%Y/%m/%d/'
+xray_eye4_writing.tiff.reg_root = assets_path
+
 OAV_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:10}', name='OAV')   # beamline OAV using prosilica camera
+OAV_writing.tiff.write_path_template = assets_path + f'{OAV_writing.name}/%Y/%m/%d/'
+OAV_writing.tiff.read_path_template = assets_path + f'{OAV_writing.name}/%Y/%m/%d/'
+OAV_writing.tiff.reg_root = assets_path
+
 #OAV_writing = StandardProsilicaWithTIFFV33('XF:11ID-M3{Det-Cam:3}', name='OAV') # printer OAV using Grasshoper UBS3 camera
-OAV_writing.tiff.write_path_template = '/nsls2/data/chx/legacy/data/%Y/%m/%d/'
-OAV_writing.tiff.read_path_template = '/nsls2/data/chx/legacy/data/%Y/%m/%d/'
-OAV_writing.tiff.reg_root = '/nsls2/data/chx/legacy/data/'
+#OAV_writing.tiff.write_path_template = '/nsls2/data/chx/legacy/data/%Y/%m/%d/'
+#OAV_writing.tiff.read_path_template = '/nsls2/data/chx/legacy/data/%Y/%m/%d/'
+#OAV_writing.tiff.reg_root = '/nsls2/data/chx/legacy/data/'
 
 
 BCam_writing =  StandardProsilicaWithTIFFV33('XF:11IDB-ES{BFLY-Cam:1}', name='BCam')
@@ -709,6 +735,8 @@ eiger1m_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig1M}', name='eiger1m_sing
 set_eiger_defaults(eiger1m_manual)
 eiger1m_manual.file.write_path_template = '/nsls2/data/chx/assets/eiger1m/%Y/%m/%d/'
 eiger1m_manual.file.reg_root ='/nsls2/data/chx/assets/eiger1m/'
+#eiger1m_manual.file.write_path_template = f"/nsls2/data/chx/proposals/{RE.md['cycle']}/{RE.md['data_session']}/assets/eiger1m/%Y/%m/%d/"
+#eiger1m_manual.file.reg_root = f"/nsls2/data/chx/proposals/{RE.md['cycle']}/{RE.md['data_session']}/assets/eiger1m"
 
 try:
     eiger500k_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig500K}', name='eiger500k_single')
