@@ -120,3 +120,4 @@ from ophyd.signal import EpicsSignalBase
 # EpicsSignalBase.set_default_timeout(timeout=10, connection_timeout=10)  # old style
 EpicsSignalBase.set_defaults(timeout=60, connection_timeout=60)  # new style
 
+assets_path = f"/nsls2/data/chx/proposals/{RE.md['cycle']}/{RE.md['data_session']}/assets/"
