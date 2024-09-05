@@ -6,17 +6,19 @@ from bson import ObjectId
 import matplotlib.patches as mpatches
 from IPython.display import clear_output
 
-cli = pymongo.MongoClient(os.environ["DATABROKER_HOST"])
+mongo_uri = f"mongodb://{os.environ['MONGO_USER_CHX']}:{os.environ['MONGO_PASSWORD_CHX']}@mongo1.nsls2.bnl.gov,mongo2.nsls2.bnl.gov,mongo3.nsls2.bnl.gov"
+cli = pymongo.MongoClient(mongo_uri)
+#cli = pymongo.MongoClient(os.environ["DATABROKER_HOST"])
 
-samples_2 = cli.get_database('samples').get_collection('samples_2')
-data_acquisition_collection = cli.get_database('samples').get_collection('data_acquisition_collection')
-beamline_pos = cli.get_database('samples').get_collection('beamline_pos')
+samples_2 = cli.get_database('chx-samples').get_collection('samples_2')
+data_acquisition_collection = cli.get_database('chx-samples').get_collection('data_acquisition_collection')
+beamline_pos = cli.get_database('chx-samples').get_collection('beamline_pos')
 from databroker import Broker                                                   
 #db = Broker.named('temp')  # for real applications, 'temp' would be 'chx' 
 print('available databases:')
 print(cli.list_database_names())
 print('\n available collection in database samples:')
-print(cli.samples.list_collection_names())
+print(cli['chx-samples'].list_collection_names())
 
 
 def update_beamline_pos(position_key='none',interactive=True):
