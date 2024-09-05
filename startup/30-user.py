@@ -266,19 +266,19 @@ def feedback_OFF(epics_feedback_on=True):
     turns EPICS (HDM encoder) feedback ON.
     """
     # Where are we now?
-    reading = yield from bp.read(hdm_pitch)
+    #reading = yield from bp.read(hdm_pitch) #bp. readh does no longer exist....
     # 'reading' looks like
     # {'hdm_pitch': {'value': -1869.0720000000001, 'timestamp': 1504122664.521454}}
     # so we unpack the value from it...
-    pos = reading['hdm_pitch']['value']
+    #pos = reading['hdm_pitch']['value']
     #DBPM feedback OFF:
     yield from mv(bpm2_feedback_selector_b, 0)
     yield from mv(bpm2_feedback_selector_a, 0)
     # EPICS feedback ON:
-    if epics_feedback_on: 
-       yield from mv(hdm_pid_setpoint, pos)
+    #if epics_feedback_on: 
+       #yield from mv(hdm_pid_setpoint, pos)
        #Set the PID loop to maintain this position.
-       yield from mv(hdm_feedback_selector, 1)
+       #yield from mv(hdm_feedback_selector, 1)
 
 
 def snap(det='eiger4m',expt=0.1,comment='Single image'):

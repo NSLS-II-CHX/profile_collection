@@ -200,8 +200,8 @@ class EigerBase(AreaDetector):
     """
     num_triggers = ADComponent(EpicsSignalWithRBV, 'cam1:NumTriggers')
     file = Cpt(EigerSimulatedFilePlugin, suffix='cam1:',
-               write_path_template='/PLACEHOLDER',
-               root='/PLACEHOLDER')
+               write_path_template='/nsls2/data/chx/assets/eiger1m/%Y/%m/%d/',
+               root='/nsls2/data/chx/assets/eiger1m/')
     beam_center_x = ADComponent(EpicsSignalWithRBV, 'cam1:BeamX')
     beam_center_y = ADComponent(EpicsSignalWithRBV, 'cam1:BeamY')
     wavelength = ADComponent(EpicsSignalWithRBV, 'cam1:Wavelength')
