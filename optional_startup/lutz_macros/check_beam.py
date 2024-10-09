@@ -40,11 +40,13 @@ def check_current_beam(bpm_int_threshold=-1,wait_for_beam=True,olog_reporting=Fa
     pv_bpm_int = 'XF:11IDB-BI{XBPM:02}Ampl:CurrTotal-I'
     pv_ring_current = 'SR:OPS-BI{DCCT:1}I:Real-I'
     pv_fe_shutter = 'XF:11ID-PPS{Sh:FE}Pos-Sts'
+    pv_hdm_feedback = 'XF:11IDA-OP{Mir:HDM-Ax:P}Sts:FB-Sel'
     
     ## for testing only!
     # pv_bpm_int = 'XF:11ID-CT{ES:1}ai8'
     # pv_ring_current = 'XF:11ID-CT{ES:1}ai9'
     # pv_fe_shutter = 'XF:11ID-CT{ES:1}ai10'
+    # pv_hdm_feedback = 'XF:11ID-CT{ES:1}ai7'
     test_timescale=1 # factor to devide wait times by for testing -> set to 1 when testing complete!
     ##################################################################################
     
@@ -62,7 +64,9 @@ def check_current_beam(bpm_int_threshold=-1,wait_for_beam=True,olog_reporting=Fa
             if verbose:
                 print(time.ctime(time.time())+' Looks like ring current is low and/or FE shutter closed -> likely beam has dumped!')
             if olog_reporting:
-                olog_entry(time.ctime(time.time())+' Looks like ring current is low and/or FE shutter closed -> likely beam has dumped!')
+                try: # we don't want to break this over e.g. a logbook timeout
+                    olog_entry(time.ctime(time.time())+' Looks like ring current is low and/or FE shutter closed -> likely beam has dumped!')
+                except: print('Olog entry had been requested, but failed...')
             while beam_dump:
                 if verbose:
                     print(time.ctime(time.time())+' Likely beam has dumped -> checking again for beam in 5min')
@@ -70,6 +74,7 @@ def check_current_beam(bpm_int_threshold=-1,wait_for_beam=True,olog_reporting=Fa
                 if caget(pv_ring_current)>300 and caget(pv_fe_shutter)<.5: #beam in the ring and FE shutter open!
                     if verbose:
                         print(time.ctime(time.time())+' Looks like beam is available, going to wait 1/2h to warm up the optics')
+                    caput(pv_hdm_feedback,1) # just making sure hdm encoder feedback is on (should be handled by EPICS ioc anyways)
                     RE(sleep(1800/test_timescale)) # wait 1/2h to warm up the optics again
                     if caget(pv_ring_current)>300 and caget(pv_fe_shutter)<.5:  #beam is still available, assume the optics is warm by now
                         DBPM_feedback(check_PID_loop=False) # not checking PID loop
@@ -78,20 +83,28 @@ def check_current_beam(bpm_int_threshold=-1,wait_for_beam=True,olog_reporting=Fa
                             beam_dump=False;beam_status=True
                             if verbose: print(time.ctime(time.time())+' checked for beam: beam intensity on BPM is above the threshold of %s mA!'%bpm_int_threshold)
                             if olog_reporting:
-                                olog_entry(time.ctime(time.time())+' checked for beam: beam intensity on BPM is above the threshold of %s mA!'%bpm_int_threshold)
+                                try:
+                                    olog_entry(time.ctime(time.time())+' checked for beam: beam intensity on BPM is above the threshold of %s mA!'%bpm_int_threshold)
+                                except: print('Olog entry had been requested, but failed...')
         else:
             beam_status=False
             if verbose: print(time.ctime(time.time())+' beam has likely dumped, but waiting for beam has not been requested...continuing.')
             if olog_reporting:
-                olog_entry(time.ctime(time.time())+' beam has likely dumped, but waiting for beam has not been requested...continuing.')
+                try:
+                    olog_entry(time.ctime(time.time())+' beam has likely dumped, but waiting for beam has not been requested...continuing.')
+                except: print('Olog entry had been requested, but failed...')
     else: #no beam on the BPM, but ring didn't dump...don't know what to do.
         beam_status=False
         if verbose: print(time.ctime(time.time())+' no beam on the BPM, but looks like beam has not dumped...something else is wrong!')
         if olog_reporting:
-            olog_entry(time.ctime(time.time())+' no beam on the BPM, but looks like beam has not dumped...something else is wrong!')
+            try:
+                olog_entry(time.ctime(time.time())+' no beam on the BPM, but looks like beam has not dumped...something else is wrong!')
+            except: print('Olog entry had been requested, but failed...')
     return beam_status
 
 def test_beam_checks():
+    try:
+        check_current_beam
     T=[300,270,260]
     for t in T:
         print('set_temperature(%s,cool_ramp=2)'%t)
