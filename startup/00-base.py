@@ -83,6 +83,7 @@ RE.md = RedisJSONDict(redis.Redis("info.chx.nsls2.bnl.gov"), prefix="")
 ###############################################################################
 # TODO: remove this block once https://github.com/bluesky/ophyd/pull/959 is
 # merged/released.
+import time
 from datetime import datetime
 from ophyd.signal import EpicsSignalBase, EpicsSignal, DEFAULT_CONNECTION_TIMEOUT
 
