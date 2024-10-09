@@ -781,7 +781,7 @@ def E_calibration(file,Edge='Cu',xtal='Si111cryo',B_off=0):
 
     plt.figure(1)
     plt.plot(B,Int,'ko-',label='experimental data')
-    plt.plot([xf.get_Bragg(xtal,Edge_data[Edge])[0],xf.get_Bragg(xtal,Edge_data[Edge])[0]],[0,1],'r--',label='Edge for: '+Edge)
+    plt.plot([get_Bragg(xtal,Edge_data[Edge])[0],get_Bragg(xtal,Edge_data[Edge])[0]],[0,1],'r--',label='Edge for: '+Edge) # NOTE: using local get_Bragg for now
     plt.legend(loc='best')
     plt.xlabel(r'$\theta_B$ [deg.]')
     plt.ylabel('intensity')
@@ -799,7 +799,7 @@ def E_calibration(file,Edge='Cu',xtal='Si111cryo',B_off=0):
     plt.grid()
         
     # calculate derivative and analyze:
-    Bragg_Edge=xf.get_Bragg(xtal,Edge_data[Edge])[0]
+    Bragg_Edge=get_Bragg(xtal,Edge_data[Edge])[0]
     plt.figure(3)
     diffdat=np.diff(Int)
     plt.plot(B[0:len(diffdat)],diffdat,'ko-',label='diff experimental data')
@@ -820,7 +820,7 @@ def E_calibration(file,Edge='Cu',xtal='Si111cryo',B_off=0):
     plt.grid()
         
     edge_index=np.argmax(diffdat)
-    B_edge=xf.get_Bragg(xtal,Edge_data[Edge])[0]
+    B_edge=get_Bragg(xtal,Edge_data[Edge])[0]
         
     print('') 
     print('Energy calibration for: ',description)
@@ -1169,3 +1169,36 @@ def retrieve_latest_scan(uid='-1',det='default',suffix='default'):
     x=np.array(x)
     y=np.array(y)
     return x, y
+
+
+def get_Bragg(reflection,E=8.):
+    """
+     by LW 17/03/2010
+     function return the Bragg angle [deg.] of a given material and reflection at a given Energy.
+     Calling sequence: thetaB=get_Bragg(reflection,E),  thetaB(1)=Bragg angle[deg.] thetaB(2)=dhkl [A], thetaB(3)=I/Io [%].
+     E: x-ray energy in keV (can be an array of energies),
+     reflection: string, e.g. 'Si111'. Reflections implemented from http://database.iem.ac.ru/mincryst, T=25C or calculated from XOP, e.g for Si111&Si220 @80K
+     type get_Bragg(\'reflections?\') for a list of currently availabel materials;
+     """
+    reflstr=['Si111cryo','Si220cryo','Si111', 'Si220', 'Si113', 'Si224', 'Si331', 'Si400','Ge111', 'Ge220', 'Ge113', 'Ge224', 'Ge331', 'Ge620', 'Ge531', 'Ge400', 'Ge115', 'Ge335','Ge440', 'Ge444', 'Ge333', 'C111', 'C220']
+    dspace=np.array([3.13379852,1.91905183,3.13542,1.92004,1.63742,1.10854,1.24589,1.35767,3.26627,2.00018,1.70576,1.15480,1.29789,0.89451,0.95627,1.41434,1.08876,0.86274,1.00009,0.81657,1.08876,2.05929,1.26105])
+    Irel=np.array([100,67.80,40.50,23.80,16.60,10.90,100,73.80,44.10,23.10,17.00,15.90,15.70,11.50,9.80,8.50,8.20,7.30,3.30,100,39.00])
+    if isinstance(reflection, str): # and all(isinstance(E, (int, long, float, complex)) for item in [E,E]): # <- bug in python: check for E is numeric works in standalone function, but not in this package => don't check
+        E=np.array(E)
+        lam=xf.get_Lambda(E,'A')
+        if reflection in reflstr:
+            ind=reflstr.index(reflection)
+            print (reflstr[ind] +': d_{hkl}=' + "%3.4f" %dspace[ind] +'A   I/I_o='+ "%3.4f" %Irel[ind])
+            theta=np.degrees(np.arcsin(lam/2/dspace[ind]))
+            ds=[];I=[]
+            for l in range(0,np.size(theta)):
+                ds.append(dspace[ind])
+                I.append(Irel[ind])
+            #return theta, ds,I
+            res=np.array([np.array([theta]),np.array(ds),np.array(I)])
+            return res.T
+        elif reflection=='reflections?':
+            print ('List of available reflections (T=25C):')
+            print (reflstr )
+        else: print ('error: reflection not found. Type get_Bragg("reflections?") for list of available reflections.')
+    else: print ('error: reflection has to be a string and E needs to be numeric. Type get_Bragg? for help')

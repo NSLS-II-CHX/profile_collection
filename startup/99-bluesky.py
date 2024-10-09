@@ -71,7 +71,7 @@ def E_scan(energy, gap=[], xtal="Si111cryo", gapmode="auto",harm=5, det=elm.sum_
 	"""
 	energy scan: Scanning both Bragg axis and gap of IVU in a linked fashion
 	calling sequence: E_scan(energy, gap=[], xtal="Si111cryo", gapmode="auto", harm=5 det=elm.sum_all.value)
-	energy: X-ray energy in [keV] & xtal define the Bragg angles used in the scan via xf.get_Bragg()
+	energy: X-ray energy in [keV] & xtal define the Bragg angles used in the scan via xf.get_Bragg(); NOTE: energy must be a LIST!!
 	gap: manually entered list of gap values with gapmode="manual" OR calculated from xf.get_gap(energy, harm, default id map) with gapmode="auto"
 	to-do: allow detector selection from 'detselect()'
 	by LW June 2016	
