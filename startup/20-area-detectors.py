@@ -128,15 +128,15 @@ class StandardProsilicaV33(SingleTriggerV33, ProsilicaDetector):
 
 class StandardProsilicaWithTIFF(StandardProsilica):
     tiff = Cpt(TIFFPluginWithFileStore,
-               suffix='TIFF1:',
-               write_path_template='/nsls2/data/chx/legacy/data/%Y/%m/%d/',
-               root='/nsls2/data/chx/legacy/data')
+               suffix='TIFF1:',)
+               #write_path_template='/nsls2/data/chx/legacy/data/%Y/%m/%d/',
+               #root='/nsls2/data/chx/legacy/data')
 
 class StandardProsilicaWithTIFFV33(StandardProsilicaV33):
     tiff = Cpt(TIFFPluginWithFileStore,
-               suffix='TIFF1:',
-               write_path_template='/nsls2/data/chx/legacy/data/%Y/%m/%d/',
-               root='/nsls2/data/chx/legacy/data')
+               suffix='TIFF1:',)
+               #write_path_template='/nsls2/data/chx/legacy/data/%Y/%m/%d/',
+               #root='/nsls2/data/chx/legacy/data')
                #root='/XF11ID/data')
 
 class EigerSimulatedFilePlugin(Device, FileStoreBase):
@@ -512,51 +512,50 @@ class EigerManualTrigger(SingleTrigger, EigerBase):
 
 # test_trig4M = FastShutterTrigger('XF:11IDB-ES{Trigger:Eig4M}', name='test_trig4M')
 
-
 ## This renaming should be reversed: no correspondance between CSS screens, PV names and ophyd....
-xray_eye1 = StandardProsilicaV33('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye1')
-xray_eye2 = StandardProsilicaV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
-xray_eye3 = StandardProsilicaV33('XF:11IDB-BI{Cam:08}', name='xray_eye3')
-xray_eye4 = StandardProsilicaV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
-OAV = StandardProsilicaV33('XF:11IDB-BI{Cam:10}', name='OAV')  # beamline OAV using prosilica camera
-#OAV = StandardProsilicaV33('XF:11ID-M3{Det-Cam:3}', name='OAV')  # printer OAV using Grasshoper UBS3 camera
+xray_eye1 = StandardProsilicaV33('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye-1')
+xray_eye2 = StandardProsilicaV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye-2')
+xray_eye3 = StandardProsilicaV33('XF:11IDB-BI{Cam:08}', name='xray_eye-3')
+xray_eye4 = StandardProsilicaV33('XF:11IDB-BI{Cam:09}', name='xray_eye-4')
+OAV = StandardProsilicaV33('XF:11IDB-BI{Cam:10}', name='oavcam-1')  # beamline OAV using prosilica camera
+#OAV = StandardProsilicaV33('XF:11ID-M3{Det-Cam:3}', name='oavcam-2')  # printer OAV using Grasshoper UBS3 camera
 #OAV.stage_sigs[OAV.cam.trigger_mode] = 'Off'
 
 
 BCam =  StandardProsilicaV33('XF:11IDB-ES{BFLY-Cam:1}', name='BCam')
 BCam.tiff.write_path_template = assets_path + f'{BCam.name}/%Y/%m/%d/'
 BCam.tiff.read_path_template = assets_path + f'{BCam.name}/%Y/%m/%d/'
-BCam.tiff.reg_root = assets_path
+BCam.tiff.reg_root = assets_path + f'{BCam.name}'
 
-xray_eye1_writing = StandardProsilicaWithTIFFV33('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye1')
+xray_eye1_writing = StandardProsilicaWithTIFFV33('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye-1')
 xray_eye1_writing.tiff.write_path_template = assets_path + f'{xray_eye1_writing.name}/%Y/%m/%d/'
 xray_eye1_writing.tiff.read_path_template = assets_path + f'{xray_eye1_writing.name}/%Y/%m/%d/'
-xray_eye1_writing.tiff.reg_root = assets_path
+xray_eye1_writing.tiff.reg_root = assets_path + f'{xray_eye1_writing.name}'
 
-xray_eye2_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
+xray_eye2_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye-2')
 xray_eye2_writing.tiff.write_path_template = assets_path + f'{xray_eye2_writing.name}/%Y/%m/%d/'
 xray_eye2_writing.tiff.read_path_template = assets_path + f'{xray_eye2_writing.name}/%Y/%m/%d/'
-xray_eye2_writing.tiff.reg_root = assets_path
+xray_eye2_writing.tiff.reg_root = assets_path + f'{xray_eye2_writing.name}'
 
-xray_eye3_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:08}', name='xray_eye3')
+xray_eye3_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:08}', name='xray_eye-3')
 xray_eye3_writing.tiff.write_path_template = assets_path + f'{xray_eye3_writing.name}/%Y/%m/%d/'
 xray_eye3_writing.tiff.read_path_template = assets_path + f'{xray_eye3_writing.name}/%Y/%m/%d/'
-xray_eye3_writing.tiff.reg_root = assets_path
+xray_eye3_writing.tiff.reg_root = assets_path + f'{xray_eye3_writing.name}'
 
-xray_eye4_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
+xray_eye4_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:09}', name='xray_eye-4')
 xray_eye4_writing.tiff.write_path_template = assets_path + f'{xray_eye4_writing.name}/%Y/%m/%d/'
 xray_eye4_writing.tiff.read_path_template = assets_path + f'{xray_eye4_writing.name}/%Y/%m/%d/'
-xray_eye4_writing.tiff.reg_root = assets_path
+xray_eye4_writing.tiff.reg_root = assets_path + f'{xray_eye4_writing.name}'
 
-OAV_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:10}', name='OAV')   # beamline OAV using prosilica camera
+OAV_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:10}', name='oavcam-1')   # beamline OAV using prosilica camera
 OAV_writing.tiff.write_path_template = assets_path + f'{OAV_writing.name}/%Y/%m/%d/'
 OAV_writing.tiff.read_path_template = assets_path + f'{OAV_writing.name}/%Y/%m/%d/'
-OAV_writing.tiff.reg_root = assets_path
+OAV_writing.tiff.reg_root = assets_path + f'{OAV_writing.name}'
 
-#OAV_writing = StandardProsilicaWithTIFFV33('XF:11ID-M3{Det-Cam:3}', name='OAV') # printer OAV using Grasshoper UBS3 camera
-#OAV_writing.tiff.write_path_template = '/nsls2/data/chx/legacy/data/%Y/%m/%d/'
-#OAV_writing.tiff.read_path_template = '/nsls2/data/chx/legacy/data/%Y/%m/%d/'
-#OAV_writing.tiff.reg_root = '/nsls2/data/chx/legacy/data/'
+#OAV_writing = StandardProsilicaWithTIFFV33('XF:11ID-M3{Det-Cam:3}', name='oavcam-2') # printer OAV using Grasshoper UBS3 camera
+#OAV_writing.tiff.write_path_template = 'assets_path + f'{OAV_writing.name}/%Y/%m/%d/'
+#OAV_writing.tiff.read_path_template = assets_path + f'{OAV_writing.name}/%Y/%m/%d/'
+#OAV_writing.tiff.reg_root = assets_path + f'{OAV_writing.name}'
 
 
 BCam_writing =  StandardProsilicaWithTIFFV33('XF:11IDB-ES{BFLY-Cam:1}', name='BCam')
