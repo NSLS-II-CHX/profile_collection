@@ -128,16 +128,15 @@ class StandardProsilicaV33(SingleTriggerV33, ProsilicaDetector):
 
 class StandardProsilicaWithTIFF(StandardProsilica):
     tiff = Cpt(TIFFPluginWithFileStore,
-               suffix='TIFF1:',)
-               #write_path_template='/nsls2/data/chx/legacy/data/%Y/%m/%d/',
-               #root='/nsls2/data/chx/legacy/data')
+               suffix='TIFF1:',
+               write_path_template='',
+               root='')
 
 class StandardProsilicaWithTIFFV33(StandardProsilicaV33):
     tiff = Cpt(TIFFPluginWithFileStore,
-               suffix='TIFF1:',)
-               #write_path_template='/nsls2/data/chx/legacy/data/%Y/%m/%d/',
-               #root='/nsls2/data/chx/legacy/data')
-               #root='/XF11ID/data')
+               suffix='TIFF1:',
+               write_path_template='',
+               root='')
 
 class EigerSimulatedFilePlugin(Device, FileStoreBase):
     sequence_id = ADComponent(EpicsSignalRO, 'SequenceId')
@@ -520,12 +519,8 @@ xray_eye4 = StandardProsilicaV33('XF:11IDB-BI{Cam:09}', name='xray_eye-4')
 OAV = StandardProsilicaV33('XF:11IDB-BI{Cam:10}', name='oavcam-1')  # beamline OAV using prosilica camera
 #OAV = StandardProsilicaV33('XF:11ID-M3{Det-Cam:3}', name='oavcam-2')  # printer OAV using Grasshoper UBS3 camera
 #OAV.stage_sigs[OAV.cam.trigger_mode] = 'Off'
+BCam =  StandardProsilicaV33('XF:11IDB-ES{BFLY-Cam:1}', name='zoomcam-1')
 
-
-BCam =  StandardProsilicaV33('XF:11IDB-ES{BFLY-Cam:1}', name='BCam')
-BCam.tiff.write_path_template = assets_path + f'{BCam.name}/%Y/%m/%d/'
-BCam.tiff.read_path_template = assets_path + f'{BCam.name}/%Y/%m/%d/'
-BCam.tiff.reg_root = assets_path + f'{BCam.name}'
 
 xray_eye1_writing = StandardProsilicaWithTIFFV33('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye-1')
 xray_eye1_writing.tiff.write_path_template = assets_path + f'{xray_eye1_writing.name}/%Y/%m/%d/'
@@ -557,8 +552,8 @@ OAV_writing.tiff.reg_root = assets_path + f'{OAV_writing.name}'
 #OAV_writing.tiff.read_path_template = assets_path + f'{OAV_writing.name}/%Y/%m/%d/'
 #OAV_writing.tiff.reg_root = assets_path + f'{OAV_writing.name}'
 
+BCam_writing =  StandardProsilicaWithTIFFV33('XF:11IDB-ES{BFLY-Cam:1}', name='zoomcam-1') # TODO: add and test tiff.write_path_template
 
-BCam_writing =  StandardProsilicaWithTIFFV33('XF:11IDB-ES{BFLY-Cam:1}', name='BCam')
 fs1 = StandardProsilicaV33('XF:11IDA-BI{FS:1-Cam:1}', name='fs1')
 fs2 = StandardProsilicaV33('XF:11IDA-BI{FS:2-Cam:1}', name='fs2')
 fs_wbs = StandardProsilicaV33('XF:11IDA-BI{BS:WB-Cam:1}', name='fs_wbs')
