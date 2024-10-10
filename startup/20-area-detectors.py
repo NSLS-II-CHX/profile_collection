@@ -747,11 +747,11 @@ eiger1m_single.file.reg_root =assets_path + f'{eiger1m_single.name}'
 # Eiger 4M using internal trigger
 eiger4m_single = EigerSingleTrigger_AD37_V2('XF:11IDB-ES{Det:Eig4M}',
                                     name='eiger4m-1')
-eiger4m_single.file.write_path_template = assets_path + f'{eiger4m_single.name}/%Y/%m/%d/'
-eiger4m_single.file.reg_root =assets_path + f'{eiger4m_single.name}'
 set_eiger_defaults(eiger4m_single)
 # AD v3.3+ config:
 eiger4m_single.cam.ensure_nonblocking()
+eiger4m_single.file.write_path_template = assets_path + f'{eiger4m_single.name}/%Y/%m/%d/'
+eiger4m_single.file.reg_root =assets_path + f'{eiger4m_single.name}'
 
 try:
     # Eiger 500K using fast trigger assembly
