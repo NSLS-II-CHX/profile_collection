@@ -156,7 +156,6 @@ def submit_to_olog(queue, cb):
         name, doc = queue.get()  # waits until document is available
         try:
             cb(name, doc)
-            print('here')
         except Exception as exc:
             warn('This olog is giving errors. This will not be logged.'
                  'Error:' + str(exc))
