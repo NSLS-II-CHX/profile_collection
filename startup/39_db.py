@@ -1,5 +1,6 @@
 def get_sid_filenames(header):
     """YG. Dev Jan, 2016
+    ---------------- DEPRECATED -----------------
     Get a bluesky scan_id, unique_id, filename by giveing uid
         
     Parameters

@@ -276,7 +276,7 @@ def acquisition_from_database(acquisition_database_obid,error_mode='try',focus_c
                                 series(det=det_list[acql[0]],expt=acql[1],acqp='auto',imnum=acql[2],OAV_mode=OAV_mode,feedback_on=acql[3],comment=str(acql[1])+'s x'+str(str(acql[2]))+'  '+RE.md['sample'])
                                 # fake some data acquisition to get a uid:
                                 #RE(count([eiger1m_single]))   # this will become series!!
-                                uid=db[-1]['start']['uid']
+                                uid=tiled_reading_client[-1]['start']['uid']
                                 #for ics in tqdm(range(100)):
                                 #    time.sleep(.1)
                                 # add uid to database for compression [can be done by 'series()' in the future]:

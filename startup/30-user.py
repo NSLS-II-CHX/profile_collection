@@ -51,11 +51,11 @@ def get_beam_center_update( uid = -1, threshold = 200  ):
         None
     
     '''
-    hdr = db[uid]
+    hdr = tiled_reading_client[uid]
     keys = [k for k, v in hdr.descriptors[0]['data_keys'].items()     if 'external' in v]
     det = keys[0]    
     print('The detector is %s.'%det)
-    imgs = list(db[uid].data(det))[0]
+    imgs = list(tiled_reading_client[uid].data(det))[0]
     if det =='eiger1m_single_image':
         Chip_Mask=np.load( '/XF11ID/analysis/2017_1/masks/Eiger1M_Chip_Mask.npy')
         img = imgs[0]
@@ -932,11 +932,11 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
             #scan_add = None
             #for l in range(10): # with multithreading, other uids might have completed before this one, e.g. with Pilatus 800k WAXS detector -> need to find last uid that uses same detector as this series
             #    if scan_add is None:
-            #        h=db[-(l+1)]
+            #        h=tiled_reading_client[-(l+1)]
             #        #for d in range(len(h.start['plan_args']['detectors'])):
             #        if detector.name in list(h.devices()): scan_add=l+1
-            #uid_add=db[-scan_add]['start']['uid']
-            uid_add=db[-1]['start']['uid']
+            #uid_add=tiled_reading_client[-scan_add]['start']['uid']
+            uid_add=tiled_reading_client[-1]['start']['uid']
             uid_list=data_acquisition_collection.find_one({'_id':'general_list'})['uid_list']
             uid_list.append(uid_add)          
             data_acquisition_collection.update_one({'_id': 'general_list'},{'$set':{'uid_list' : uid_list}})
@@ -956,10 +956,10 @@ def check_uid():
     for l in range(10): # with multithreading, other uids might have completed before this one, e.g. with Pilatus 800k WAXS detector -> need to find last uid that uses same detector as this series
         print(l)
         if scan_add is None:
-            h=db[-(l+1)]
+            h=tiled_reading_client[-(l+1)]
             for d in range(len(h.start['plan_args']['detectors'])):
                 if detector.name in h.start['plan_args']['detectors'][d]: scan_add=l+1
-    uid_add=db[-scan_add]['start']['uid']   
+    uid_add=tiled_reading_client[-scan_add]['start']['uid']   
 
     
     
@@ -1217,7 +1217,7 @@ def series_old(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,c
     ####### add acquired uid to database list for automatic compression #########
     if auto_compression:
         try:
-            uid_add=db[-1]['start']['uid']
+            uid_add=tiled_reading_client[-1]['start']['uid']
             uid_list=data_acquisition_collection.find_one({'_id':'general_list'})['uid_list']
             uid_list.append(uid_add)
             data_acquisition_collection.update_one({'_id': 'general_list'},{'$set':{'uid_list' : uid_list}})

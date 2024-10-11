@@ -6,11 +6,12 @@ import time
 from redis_json_dict import RedisJSONDict
 from tiled.client import from_profile
 from ophyd.signal import EpicsSignalBase
+from databroker import Broker
 
 EpicsSignalBase.set_defaults(timeout=60, connection_timeout=60)  # new style
 
-# # Configure a Tiled writing client
-# tiled_writing_client = from_profile("nsls2", api_key=os.environ["TILED_BLUESKY_WRITING_API_KEY_CHX"])["chx"]["raw"]
+# Configure a Tiled writing client
+tiled_writing_client = from_profile("nsls2", api_key=os.environ["TILED_BLUESKY_WRITING_API_KEY_CHX"])["chx"]["raw"]
 
 class TiledInserter:
     def insert(self, name, doc):
@@ -33,12 +34,13 @@ tiled_inserter = TiledInserter()
 
 # The function below initializes RE and subscribes tiled_inserter to it
 nslsii.configure_base(get_ipython().user_ns,
-                      "chx",
-            #    tiled_inserter,
+               tiled_inserter,
                publish_documents_with_kafka=True)
 
-# print("Initializing Tiled reading client...\nMake sure you check for duo push.")
-# db = tiled_reading_client = from_profile("nsls2", username=None)["chx"]["raw"]
+print("Initializing Tiled reading client...\nMake sure you check for duo push.")
+tiled_reading_client = from_profile("nsls2", username=None)["chx"]["raw"]
+
+db = Broker(tiled_reading_client)
 
 # set plot properties for 4k monitors
 plt.rcParams['figure.dpi']=200
