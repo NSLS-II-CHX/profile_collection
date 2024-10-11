@@ -73,6 +73,7 @@ RE.md = PersistentDict(runengine_metadata_dir)
 ###############################################################################
 # TODO: remove this block once https://github.com/bluesky/ophyd/pull/959 is
 # merged/released.
+import time
 from datetime import datetime
 from ophyd.signal import EpicsSignalBase, EpicsSignal, DEFAULT_CONNECTION_TIMEOUT
 
