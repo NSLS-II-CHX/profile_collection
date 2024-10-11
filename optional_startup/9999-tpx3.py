@@ -109,8 +109,8 @@ class Tpx3Files(Device):
 
     def unstage(self) -> List[object]:
         # TODO reset these to their original values rather than junk
-        self.raw_filepath.set('/does/not/exist/').wait()
-        self.raw_file_template.set("garbage").wait()
+        self.raw_filepath.set('file:/media/nvme/raw/').wait()
+        self.raw_file_template.set(f"garbage").wait()
         self.raw_write_enable.set(0).wait()
 
         # because we need to flush setting to actual server from IOC
