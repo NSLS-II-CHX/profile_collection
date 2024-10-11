@@ -71,7 +71,7 @@ class Tpx3Files(Device):
         
         self._res_uid = res_uid = new_short_uid()
         #write_path_template = 'file:/nsls2/data/chx/legacy/data/%Y/%m/%d/'
-        write_path_template = f"file:/nsls2/data/chx/proposals/{RE.md['cycle']}/{RE.md['data_session']}/assets/TPX3/%Y/%m/%d/"
+        write_path_template = f"file:/nsls2/data/chx/proposals/{RE.md['cycle']}/{RE.md['data_session']}/assets/timepix-1/%Y/%m/%d/"
         self._write_path = write_path = datetime.now().strftime(write_path_template)
         self.raw_filepath.set(write_path).wait()
 
