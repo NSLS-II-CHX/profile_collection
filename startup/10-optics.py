@@ -281,6 +281,9 @@ class amp_motor(Device):
 SAXS_x1 = EpicsMotor('XF:11IDB-ES{Tbl:SAXS-Ax:X1}Mtr',name='SAXS_x1')
 SAXS_x2 = EpicsMotor('XF:11IDB-ES{Tbl:SAXS-Ax:X2}Mtr',name='SAXS_x2')
 
+# SAXS table: WAXS section rotation
+Timepix_x = EpicsMotor('XF:11IDB-ES{Tbl:SAXS-Ax:M1}Mtr',name='Timepix_x')
+Timepix_y = EpicsMotor('XF:11IDB-ES{Tbl:SAXS-Ax:M2}Mtr',name='Timepix_y')
 
 # Note inconsistency in capitalization of Bpm/BPM below.
 bpm1 = XYMotor('XF:11IDA-BI{Bpm:1', name='bpm1')
