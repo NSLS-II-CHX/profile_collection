@@ -63,6 +63,15 @@ runengine_metadata_dir = appdirs.user_data_dir(appname="bluesky") / Path("runeng
 # PersistentDict will create the directory if it does not exist
 RE.md = PersistentDict(runengine_metadata_dir)
 
+data_session = RE.md.get("data_session")
+if data_session is None:
+    raise ValueError("Data session is None!")
+
+cycle = '2023-3' # TODO: don't hardcode this
+
+proposal_dir = f"/nsls2/data/chx/proposals/{cycle}/{data_session}"
+Path(proposal_dir).mkdir(parents=True, exist_ok=True)
+
 # send ophyd debug log to the console
 # import logging
 #logging.getLogger('ophyd').setLevel('DEBUG')

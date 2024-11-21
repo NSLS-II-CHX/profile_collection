@@ -652,8 +652,8 @@ try:
     set_eiger_defaults(eiger500k_single)
     # AD v3.3+ config:
     eiger500k_single.cam.ensure_nonblocking()
-    eiger500k_single.file.write_path_template = '/nsls2/data/chx/assets/eiger500k/%Y/%m/%d/'
-    eiger500k_single.file.reg_root ='/nsls2/data/chx/assets/eiger500k/'
+    eiger500k_single.file.write_path_template = f'{proposal_dir}/assets/eiger500k/%Y/%m/%d/'
+    eiger500k_single.file.reg_root =f'{proposal_dir}/assets/eiger500k/'
 except Exception:
     print('eiger500k not configured...')
     raise
@@ -668,8 +668,8 @@ eiger1m_single.cam.ensure_nonblocking()
 # Eiger 4M using internal trigger
 eiger4m_single = EigerSingleTrigger_AD37_V2('XF:11IDB-ES{Det:Eig4M}',
                                     name='eiger4m_single')
-eiger4m_single.file.write_path_template = '/nsls2/data/chx/assets/eiger4m/%Y/%m/%d/'
-eiger4m_single.file.reg_root ='/nsls2/data/chx/assets/eiger4m/'
+eiger4m_single.file.write_path_template = f'{proposal_dir}/assets/eiger4m/%Y/%m/%d/'
+eiger4m_single.file.reg_root =f'{proposal_dir}/assets/eiger4m/'
 set_eiger_defaults(eiger4m_single)
 # AD v3.3+ config:
 eiger4m_single.cam.ensure_nonblocking()
@@ -678,22 +678,22 @@ try:
     # Eiger 500K using fast trigger assembly
     eiger500k = EigerFastTrigger('XF:11IDB-ES{Det:Eig500K}', name='eiger500k')
     set_eiger_defaults(eiger500k)
-    eiger500k.file.write_path_template = '/nsls2/data/chx/assets/eiger500k/%Y/%m/%d/'
-    eiger500k.file.reg_root ='/nsls2/data/chx/assets/eiger500k/'
+    eiger500k.file.write_path_template = f'{proposal_dir}/assets/eiger500k/%Y/%m/%d/'
+    eiger500k.file.reg_root =f'{proposal_dir}/assets/eiger500k/'
 except Exception:
     print('eiger500k not configured...')
 
 # Eiger 1M using fast trigger assembly
 eiger1m = EigerFastTrigger('XF:11IDB-ES{Det:Eig1M}', name='eiger1m')
 set_eiger_defaults(eiger1m)
-eiger1m.file.write_path_template = '/nsls2/data/chx/assets/eiger1m/%Y/%m/%d/'
-eiger1m.file.reg_root ='/nsls2/data/chx/assets/eiger1m/'
+eiger1m.file.write_path_template = f'{proposal_dir}/assets/eiger1m/%Y/%m/%d/'
+eiger1m.file.reg_root =f'{proposal_dir}/assets/eiger1m/'
 
 # Eiger 4M using fast trigger assembly
 eiger4m = EigerFastTrigger('XF:11IDB-ES{Det:Eig4M}', name='eiger4m')
 set_eiger_defaults(eiger4m)
-eiger4m.file.write_path_template = '/nsls2/data/chx/assets/eiger4m/%Y/%m/%d/'
-eiger4m.file.reg_root ='/nsls2/data/chx/assets/eiger4m/'
+eiger4m.file.write_path_template = f'{proposal_dir}/assets/eiger4m/%Y/%m/%d/'
+eiger4m.file.reg_root =f'{proposal_dir}/assets/eiger4m/'
 
 # setup manual eiger for 1d scans
 # prototype
@@ -702,19 +702,19 @@ eiger4m.file.reg_root ='/nsls2/data/chx/assets/eiger4m/'
 # (only one key name should be used)
 eiger4m_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig4M}', name='eiger4m_single')
 set_eiger_defaults(eiger4m_manual)
-eiger4m_manual.file.write_path_template = '/nsls2/data/chx/assets/eiger4m/%Y/%m/%d/'
-eiger4m_manual.file.reg_root ='/nsls2/data/chx/assets/eiger4m/'
+eiger4m_manual.file.write_path_template = f'{proposal_dir}/assets/eiger4m/%Y/%m/%d/'
+eiger4m_manual.file.reg_root =f'{proposal_dir}/assets/eiger4m/'
 
 eiger1m_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig1M}', name='eiger1m_single')
 set_eiger_defaults(eiger1m_manual)
-eiger1m_manual.file.write_path_template = '/nsls2/data/chx/assets/eiger1m/%Y/%m/%d/'
-eiger1m_manual.file.reg_root ='/nsls2/data/chx/assets/eiger1m/'
+eiger1m_manual.file.write_path_template = f'{proposal_dir}/assets/eiger1m/%Y/%m/%d/'
+eiger1m_manual.file.reg_root =f'{proposal_dir}/assets/eiger1m/'
 
 try:
     eiger500k_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig500K}', name='eiger500k_single')
     set_eiger_defaults(eiger500k_manual)
-    eiger500k_manual.file.write_path_template = '/nsls2/data/chx/assets/eiger500k/%Y/%m/%d/'
-    eiger500k_manual.file.reg_root ='/nsls2/data/chx/assets/eiger500k/'
+    eiger500k_manual.file.write_path_template = f'{proposal_dir}/assets/eiger500k/%Y/%m/%d/'
+    eiger500k_manual.file.reg_root =f'{proposal_dir}/assets/eiger500k/'
 except Exception:
     print('eiger500k not configured...')
 
