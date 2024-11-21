@@ -1,113 +1,52 @@
 import nslsii
-from bluesky import RunEngine
-nslsii.configure_base(
-    get_ipython().user_ns,
-    'chx',
-    publish_documents_with_kafka=True
-)
+import redis
+import os
 
-# from tiled.client import from_profile
-# from databroker.v1 import Broker
+import time
+from redis_json_dict import RedisJSONDict
+from tiled.client import from_profile
+from ophyd.signal import EpicsSignalBase
+from databroker import Broker
 
-# c = from_profile("chx-secure")
+EpicsSignalBase.set_defaults(timeout=60, connection_timeout=60)  # new style
 
-# db = Broker(c)
+# Configure a Tiled writing client
+tiled_writing_client = from_profile("nsls2", api_key=os.environ["TILED_BLUESKY_WRITING_API_KEY_CHX"])["chx"]["raw"]
+
+class TiledInserter:
+    def insert(self, name, doc):
+        ATTEMPTS = 20
+        error = None
+        for _ in range(ATTEMPTS):
+            try:
+                tiled_writing_client.post_document(name, doc)
+            except Exception as exc:
+                print("Document saving failure:", repr(exc))
+                error = exc
+            else:
+                break
+            time.sleep(2)
+        else:
+            # Out of attempts
+            raise error
+
+tiled_inserter = TiledInserter()
+
+# The function below initializes RE and subscribes tiled_inserter to it
+nslsii.configure_base(get_ipython().user_ns,
+               tiled_inserter,
+               publish_documents_with_kafka=True)
+
+print("Initializing Tiled reading client...\nMake sure you check for duo push.")
+tiled_reading_client = from_profile("nsls2", username=None)["chx"]["raw"]
+
+db = Broker(tiled_reading_client)
 
 # set plot properties for 4k monitors
 plt.rcParams['figure.dpi']=200
 
-from pathlib import Path
+# Set the metadata dictionary
+RE.md = RedisJSONDict(redis.Redis("info.chx.nsls2.bnl.gov"), prefix="")
 
-import appdirs
-
-
-try:
-    from bluesky.utils import PersistentDict
-except ImportError:
-    import msgpack
-    import msgpack_numpy
-    import zict
-
-    class PersistentDict(zict.Func):
-        def __init__(self, directory):
-            self._directory = directory
-            self._file = zict.File(directory)
-            super().__init__(self._dump, self._load, self._file)
-
-        @property
-        def directory(self):
-            return self._directory
-
-        def __repr__(self):
-            return f"<{self.__class__.__name__} {dict(self)!r}>"
-
-        @staticmethod
-        def _dump(obj):
-            "Encode as msgpack using numpy-aware encoder."
-            # See https://github.com/msgpack/msgpack-python#string-and-binary-type
-            # for more on use_bin_type.
-            return msgpack.packb(
-                obj,
-                default=msgpack_numpy.encode,
-                use_bin_type=True)
-
-        @staticmethod
-        def _load(file):
-            return msgpack.unpackb(
-                file,
-                object_hook=msgpack_numpy.decode,
-                raw=False)
-
-runengine_metadata_dir = appdirs.user_data_dir(appname="bluesky") / Path("runengine-metadata")
-
-# PersistentDict will create the directory if it does not exist
-RE.md = PersistentDict(runengine_metadata_dir)
-
-# send ophyd debug log to the console
-# import logging
-#logging.getLogger('ophyd').setLevel('DEBUG')
-#console_handler = logging.StreamHandler()
-#console_handler.setLevel("DEBUG")
-#logging.getLogger('ophyd').addHandler(console_handler)
-
-###############################################################################
-# TODO: remove this block once https://github.com/bluesky/ophyd/pull/959 is
-# merged/released.
-import time
-from datetime import datetime
-from ophyd.signal import EpicsSignalBase, EpicsSignal, DEFAULT_CONNECTION_TIMEOUT
-
-def print_now():
-    return datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.%f')
-
-def wait_for_connection_base(self, timeout=DEFAULT_CONNECTION_TIMEOUT):
-    '''Wait for the underlying signals to initialize or connect'''
-    if timeout is DEFAULT_CONNECTION_TIMEOUT:
-        timeout = self.connection_timeout
-    # print(f'{print_now()}: waiting for {self.name} to connect within {timeout:.4f} s...')
-    start = time.time()
-    try:
-        self._ensure_connected(self._read_pv, timeout=timeout)
-        # print(f'{print_now()}: waited for {self.name} to connect for {time.time() - start:.4f} s.')
-    except TimeoutError:
-        if self._destroyed:
-            raise DestroyedError('Signal has been destroyed')
-        raise
-
-def wait_for_connection(self, timeout=DEFAULT_CONNECTION_TIMEOUT):
-    '''Wait for the underlying signals to initialize or connect'''
-    if timeout is DEFAULT_CONNECTION_TIMEOUT:
-        timeout = self.connection_timeout
-    # print(f'{print_now()}: waiting for {self.name} to connect within {timeout:.4f} s...')
-    start = time.time()
-    self._ensure_connected(self._read_pv, self._write_pv, timeout=timeout)
-    # print(f'{print_now()}: waited for {self.name} to connect for {time.time() - start:.4f} s.')
-
-EpicsSignalBase.wait_for_connection = wait_for_connection_base
-EpicsSignal.wait_for_connection = wait_for_connection
-###############################################################################
-
-from ophyd.signal import EpicsSignalBase
-# EpicsSignalBase.set_default_timeout(timeout=10, connection_timeout=10)  # old style
-EpicsSignalBase.set_defaults(timeout=60, connection_timeout=60)  # new style
-
+# Setup the path to the secure assets folder for the current proposal
+assets_path = f"/nsls2/data/chx/proposals/{RE.md['cycle']}/{RE.md['data_session']}/assets/"

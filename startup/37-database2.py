@@ -200,7 +200,8 @@ def acquisition_from_database(acquisition_database_obid,error_mode='try',focus_c
                     sample_info=samples_2.find_one({'_id':data_acq_dict[i]['sample_id']})
                     # prep data acquisition: move to slot center, taking offsets from beamlin_data
                     offsets=beamline_pos.find_one({'_id':data_acq_dict['sample_mount']+'_sample_center'})['positions']
-                    y_off = offsets['diff_yh'];z_off=offsets['diff_zh'];
+                    y_off = offsets['diff_yh']
+                    z_off=offsets['diff_zh']
                     # get correct z-offset for sample holder, depends e.g. on capillary diameter (only capillary and flat cell are implemented)
                     if focus_correction == True:
                         zfocus=get_focus(mount=data_acq_dict['sample_mount'],holder=sample_info['sample']['holder'])
@@ -208,7 +209,8 @@ def acquisition_from_database(acquisition_database_obid,error_mode='try',focus_c
                         print(bcolors.WARNING+'RE(mov(diff.zh,'+str(zfocus)+')) '+ bcolors.ENDC)
                         RE(mov(diff.zh,zfocus))
                     print('center position of '+i+' in sample holder mount '+data_acq_dict['sample_mount']+': '+str(mount_dict[data_acq_dict['sample_mount']][i[4:]]))
-                    x_cen=mount_dict[data_acq_dict['sample_mount']][i[4:]][0];y_cen=mount_dict[data_acq_dict['sample_mount']][i[4:]][1]
+                    x_cen=mount_dict[data_acq_dict['sample_mount']][i[4:]][0]
+                    y_cen=mount_dict[data_acq_dict['sample_mount']][i[4:]][1]
                     if not data_acq_dict['sample_mount'] == 'multi':
                         x_off=offsets['diff_xh']
                         print(bcolors.WARNING+'RE(mov(diff.xh,'+str(-x_cen+x_off)+',diff.yh,'+str(-y_cen+y_off)+')) '+ bcolors.ENDC)
@@ -252,7 +254,8 @@ def acquisition_from_database(acquisition_database_obid,error_mode='try',focus_c
                                         [dose_ind,next_x_point,next_y_point]=next_grid_point(x_point,y_point,dose,mode=nspm)
                                         print('new spot: [x,y]: '+str([next_x_point,next_y_point]))
                     # move to next sample grid point:
-                                        x_cen=mount_dict[data_acq_dict['sample_mount']][i[4:]][0]+next_x_point;y_cen=mount_dict[data_acq_dict['sample_mount']][i[4:]][1]+next_y_point
+                                        x_cen=mount_dict[data_acq_dict['sample_mount']][i[4:]][0]+next_x_point
+                                        y_cen=mount_dict[data_acq_dict['sample_mount']][i[4:]][1]+next_y_point
                                         if not data_acq_dict['sample_mount'] == 'multi':
                                             print(bcolors.WARNING+'RE(mov(diff.xh,'+str(-x_cen+x_off)+',diff.yh,'+str(-y_cen+y_off)+')) '+ bcolors.ENDC)
                                             RE(mov(diff.xh,-x_cen+x_off,diff.yh,-y_cen+y_off))
@@ -283,13 +286,13 @@ def acquisition_from_database(acquisition_database_obid,error_mode='try',focus_c
                                 
                                 series_options =  acql[4]['series_options']
                                 if 'feedback_on' in list(   series_options.keys() ):
-                                	feedback_on = series_options[ 'feedback_on' ]
+                                    feedback_on = series_options[ 'feedback_on' ]
                                 else:
-                                	feedback_on = False
+                                    feedback_on = False
                                 if 'analysis' in list(   series_options.keys() ):
-                                	analysis = series_options[ 'analysis' ]
+                                    analysis = series_options[ 'analysis' ]
                                 else:
-                                	analysis = 'iso'                           
+                                    analysis = 'iso'                           
                                 
                                 
                                 
@@ -303,13 +306,13 @@ def acquisition_from_database(acquisition_database_obid,error_mode='try',focus_c
                                 
                                 # fake some data acquisition to get a uid:
                                 #RE(count([eiger1m_single]))   # this will become series!!
-                                uid=db[-1]['start']['uid']
+                                uid=tiled_reading_client[-1]['start']['uid']
                                 #for ics in tqdm(range(100)):
                                 #    time.sleep(.1)
                                 # add uid to database for compression:
                                 uid_list=data_acquisition_collection.find_one({'_id':'general_list'})['uid_list']
                                 sample_uidlist=samples_2.find_one({'_id':data_acq_dict[i]['sample_id']})['info']['uids']
-                                uid_list.append(uid);
+                                uid_list.append(uid)
                                 
                                 
                                 ustr = str(acquisition_database_obid)
