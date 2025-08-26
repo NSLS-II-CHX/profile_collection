@@ -77,3 +77,7 @@ zz-dama.py
 
 # MacOS Attributes File
 *.DS_Store
+
+# pixi environments
+.pixi/*
+!.pixi/config.toml
