@@ -27,6 +27,12 @@ ply = ">=3.11,<4"
 colorlog = ">=6.9.0,<7"
 epicscorelibs = "*"
 pydantic-numpy = "*"
+pandas = ">=2.3.2,<3"
+suitcase-specfile = ">=0.2.5,<0.3"
+channelarchiver = ">=1.0.0,<2"
+databroker = ">=2.0.0b64,<3"
+lmfit = ">=1.3.4,<2"
+termcolor = ">=3.1.0,<4"
 
 
 [feature.profile.pypi-dependencies]
