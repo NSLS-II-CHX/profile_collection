@@ -33,10 +33,14 @@ channelarchiver = ">=1.0.0,<2"
 databroker = ">=2.0.0b64,<3"
 lmfit = ">=1.3.4,<2"
 termcolor = ">=3.1.0,<4"
+pyfai = ">=2025.3.0,<2026"
+silx = ">=2.2.2,<3"
 
 
 [feature.profile.pypi-dependencies]
 ophyd-async = { version = ">=0.9.0, <0.10", extras = ["ca", "pva"] }
+eiger-io = { git = "https://github.com/nsls-ii/eiger-io" }
+chxtools = { git = "https://github.com/nsls-ii-chx/chxtools" }
 
 
 [feature.qs.dependencies]
