@@ -19,7 +19,8 @@ def sum_image(filename, firstim=0, lastim=9999):
     filename can be 'ia' for chosing path and first image via GUI
     """
     from PIL import Image
-    import tkinter, tkFileDialog
+    import tkinter
+    from tkinter import filedialog as tkFileDialog
     from matplotlib import pyplot as plt
     import numpy as np
     import time
@@ -294,103 +295,104 @@ def trans_td_to_tf(td):
                     for i in range( len(t))] )
     return tf
 
-def plot_pv_values( dict_tv, time, keys=None,title=None, xlabel='Time', ylim_tv=None,
-            data= None,  ylim_data=None, img=None,pixsize=0.79,
-            aspect=5.0, ylim_img = None):
-
-    import pandas.tools.plotting as ptg
-    import matplotlib.dates as md
-    #from numpy import arange,array
-    import numpy as np
-    import datetime
-    import matplotlib.pyplot as plt
-
-    if keys is None:
-        keys=dict_tv.keys()
-    M = len(keys)
-
-    if img is not None:
-        N=M+1
-        N0=1
-        N_img=N0-1
-    else:
-        N=M
-        N0=0
-        N_img=-1
-    if data is not None:
-        N +=1
-        N0+=1
-        N_data=N_img +1
-
-    sharex=True
-    #fig, axs = plt.subplots(N,sharex = True)
-    fig,axs=ptg._subplots( N, sharex=sharex,sharey=False, layout=[N,1])
-    #tf=time
-    axs[0].set_xlim( np.min(time), np.max(time) )
-    for n in range(N0,N):
-        i=n-N0
-        d = dict_tv[ keys[i] ]
-        if ylim_tv is  None:
-            ymean = d[ keys[i] ].mean()
-            ymax,ymin = d[ keys[i] ].max(), d[ keys[i] ].min()
-            width = min( [ ymax-ymean, ymean - ymin] )
-            ymax_ = ymean + width
-            ymin_ = ymean - width
-            #print ymean, ymax_, ymin_
-            #ylim=[ ymin_ - ymean*.2, ymax_ + ymean*.2]
-            ylim = [ymean - width*5, ymean + width *5]
-        else:ylim=ylim_tv[i]
-
-        d.plot( x='tf', y = [ keys[i] ],subplots=False, ylim=ylim,
-                marker='o',c='b', ls = '--', ax=axs[n])
-        yt = axs[n].get_yticks()
-        axs[n].set_yticklabels(yt,fontsize=24)
-        axs[n].set_ylabel( keys[i] ,fontsize=24)
-        ki=keys[i]
-        if n!=N-1:
-            m=axs[n].get_xticklabels()
-            axs[n].set_xlabel('')
-            for x in m:x.set_visible(False)
-
-    #dd =np.array( [datetime.datetime.fromtimestamp( tf[i] )
-                   #for i in range( 0, len(tf)  )] )
-    if img is not None:
-        dy,dx = img.shape
-        shape=img.shape
-        extent= [ np.min(time), np.max(time), dy* pixsize, 0 ]
-        show_img(img, aspect =aspect, ax=axs[N_img],
-                extent=extent,  title='', ylim=ylim_img,xticks=True)
-        m=axs[N_img].get_xticklabels()
-        for x in m:x.set_visible(False)
-        #axs[N_img].set_xlim( np.min(time), np.max(time) )
-        axs[N_img].set_ylabel('size, um',fontsize=24)
-
-    if data is not None:
-        data.plot(  x=time, subplots=False,  ylim=ylim_data,
-                marker='s',c='g', ls = '--', ax=axs[N_data])  #x= tf,
-        m=axs[N_data].get_xticklabels()
-        for x in m:x.set_visible(False)
-        axs[N_data].set_xlabel('')
-        axs[N_data].set_ylabel( data.keys()[0] ,fontsize=24)
-        yt = axs[N_data].get_yticks()
-        axs[N_data].set_yticklabels(yt,fontsize=24)
-
-
-    if title is not None:axs[0].set_title(title, fontsize=28)
-
-    axs[n].set_xlim( np.min(time), np.max(time) )
-
-    #print trans_tf_to_td( [np.min(time), np.max(time) ])
-    xt = axs[n].get_xticks()
-    xticks =  trans_tf_to_td(xt)
-    axs[n].set_xlabel(xlabel,fontsize=24)
-    axs[n].set_xticklabels([x.strftime('%m-%d %H:%M') for x in xticks],fontsize=24)
-
-    axs[n].set_ylabel( ki ,fontsize=24)
-
-    #axs[0].set_xlim( np.min(time), np.max(time) )
-
-
+# def plot_pv_values( dict_tv, time, keys=None,title=None, xlabel='Time', ylim_tv=None,
+#             data= None,  ylim_data=None, img=None,pixsize=0.79,
+#             aspect=5.0, ylim_img = None):
+#
+#     import pandas.tools.plotting as ptg
+#     import matplotlib.dates as md
+#     #from numpy import arange,array
+#     import numpy as np
+#     import datetime
+#     import matplotlib.pyplot as plt
+#
+#     if keys is None:
+#         keys=dict_tv.keys()
+#     M = len(keys)
+#
+#     if img is not None:
+#         N=M+1
+#         N0=1
+#         N_img=N0-1
+#     else:
+#         N=M
+#         N0=0
+#         N_img=-1
+#     if data is not None:
+#         N +=1
+#         N0+=1
+#         N_data=N_img +1
+#
+#     sharex=True
+#     #fig, axs = plt.subplots(N,sharex = True)
+#     fig,axs=ptg._subplots( N, sharex=sharex,sharey=False, layout=[N,1])
+#     #tf=time
+#     axs[0].set_xlim( np.min(time), np.max(time) )
+#     for n in range(N0,N):
+#         i=n-N0
+#         d = dict_tv[ keys[i] ]
+#         if ylim_tv is  None:
+#             ymean = d[ keys[i] ].mean()
+#             ymax,ymin = d[ keys[i] ].max(), d[ keys[i] ].min()
+#             width = min( [ ymax-ymean, ymean - ymin] )
+#             ymax_ = ymean + width
+#             ymin_ = ymean - width
+#             #print ymean, ymax_, ymin_
+#             #ylim=[ ymin_ - ymean*.2, ymax_ + ymean*.2]
+#             ylim = [ymean - width*5, ymean + width *5]
+#         else:ylim=ylim_tv[i]
+#
+#         d.plot( x='tf', y = [ keys[i] ],subplots=False, ylim=ylim,
+#                 marker='o',c='b', ls = '--', ax=axs[n])
+#         yt = axs[n].get_yticks()
+#         axs[n].set_yticklabels(yt,fontsize=24)
+#         axs[n].set_ylabel( keys[i] ,fontsize=24)
+#         ki=keys[i]
+#         if n!=N-1:
+#             m=axs[n].get_xticklabels()
+#             axs[n].set_xlabel('')
+#             for x in m:x.set_visible(False)
+#
+#     #dd =np.array( [datetime.datetime.fromtimestamp( tf[i] )
+#                    #for i in range( 0, len(tf)  )] )
+#     if img is not None:
+#         dy,dx = img.shape
+#         shape=img.shape
+#         extent= [ np.min(time), np.max(time), dy* pixsize, 0 ]
+#         show_img(img, aspect =aspect, ax=axs[N_img],
+#                 extent=extent,  title='', ylim=ylim_img,xticks=True)
+#         m=axs[N_img].get_xticklabels()
+#         for x in m:x.set_visible(False)
+#         #axs[N_img].set_xlim( np.min(time), np.max(time) )
+#         axs[N_img].set_ylabel('size, um',fontsize=24)
+#
+#     if data is not None:
+#         data.plot(  x=time, subplots=False,  ylim=ylim_data,
+#                 marker='s',c='g', ls = '--', ax=axs[N_data])  #x= tf,
+#         m=axs[N_data].get_xticklabels()
+#         for x in m:x.set_visible(False)
+#         axs[N_data].set_xlabel('')
+#         axs[N_data].set_ylabel( data.keys()[0] ,fontsize=24)
+#         yt = axs[N_data].get_yticks()
+#         axs[N_data].set_yticklabels(yt,fontsize=24)
+#
+#
+#     if title is not None:axs[0].set_title(title, fontsize=28)
+#
+#     axs[n].set_xlim( np.min(time), np.max(time) )
+#
+#     #print trans_tf_to_td( [np.min(time), np.max(time) ])
+#     xt = axs[n].get_xticks()
+#     xticks =  trans_tf_to_td(xt)
+#     axs[n].set_xlabel(xlabel,fontsize=24)
+#     axs[n].set_xticklabels([x.strftime('%m-%d %H:%M') for x in xticks],fontsize=24)
+#
+#     axs[n].set_ylabel( ki ,fontsize=24)
+#
+#     #axs[0].set_xlim( np.min(time), np.max(time) )
+#
+#
+#
 
 def make_wave_data2( x,y):
     import numpy as np
@@ -510,45 +512,13 @@ def get_archive_pv_value(PV, label, start_time, end_time,scan_archives=True,
 
 
 def test_db( sid ):
-    from databroker import DataBroker as db, get_fields, get_table
+    from databroker import Broker as db
     h = db[sid]
-    scan = get_table( h )
-    fld = get_fields( h )
+    scan = db.get_table( h )
+    fld = db.get_fields( h )
     print( 'the scan files include %s'%fld)
 
 
-def read_scan( sid,fill=True ):
-    ''' read data from sid = scan_id'''
-
-    from dataportal import (DataBroker as db,
-                        StepScan as ss,
-                        StepScan, DataBroker,
-                        DataMuxer as dm)
-
-
-    import datetime
-
-    hdr = db[sid]
-    ev=db.fetch_events(hdr,fill=fill)  #, fill=True)
-    muxer = dm.from_events( ev )
-    data = muxer.to_sparse_dataframe()
-    dt = data.time
-    #print dt
-    #print dt[0]
-    #print dt[len(dt)-1]
-    #data = list( db.fetch_events(hdr))
-
-    t1 = datetime.datetime.fromtimestamp(dt[0]).strftime('%Y-%m-%d %H:%M:%S')
-    t2 = datetime.datetime.fromtimestamp(dt[len(dt)-1]).strftime('%Y-%m-%d %H:%M:%S')
-
-    #t1 = dt[0].strftime('%Y-%m-%d %H:%M:%S')
-    #t2 = dt[len(dt)-1].strftime('%Y-%m-%d %H:%M:%S')
-
-    print('the first scan time is:   %s'%t1)
-    print('the last scan time  is:   %s'%t2)
-    start_time=t1
-    end_time =t2
-    return data, start_time, end_time
 
 
 #w,t = get_waterfall( data,direction='vert', cuts=[1000],firstim=0, lastim=1200,detector="xray_cam_img_image_lightfield",)
@@ -626,7 +596,8 @@ def line_focus(filename,imgs=None,times=None, direction='horz',
     function to analyse line focus data for e.g. stability
     """
     from PIL import Image
-    import tkinter, tkFileDialog
+    import tkinter
+    from tkinter import filedialog as tkFileDialog
     from matplotlib import pyplot as plt
     import numpy as np
     from scipy.optimize import curve_fit
@@ -905,119 +876,119 @@ def get_fft( t,y ):
 
 
 
-def plot_line_focus2(df_res,cuts,pix=0.79,title=None,
-            times=None, ROI=None, FFT=True):
-    from matplotlib import pyplot as plt
-    import numpy as np
-    import time,datetime
-    import pandas.tools.plotting as ptg
-    import matplotlib.dates as md
-    import pandas as pd
-    if ROI is not None:
-        x1,x2=ROI
-    else:
-        x1,x2=0,len(times)
-
-    times_ = times[x1:x2]
-    df_res_ = df_res.loc[x1:x2-1]
-    df_res_.index = range( 0, x2-x1 )
-
-    N=len(times_)
-    keys = df_res.keys()
-    M = len(keys)
-    td=times_
-    tf =  trans_td_to_tf( td )
-
-    if title==None:title='LF_'
-    fig,axs=ptg._subplots( M, sharex=True,sharey=False,
-                           layout=[M,1])
-    axs[0].set_title(title)
-    for n in range(M):
-        df_res_.plot( x=td, y = [ keys[n] ],subplots=False,
-                marker='o',c='b', ls = '--', ax=axs[n])
-
-
-    #do analysis _center
-
-    fig2,axs2=ptg._subplots( 2, sharex=True,sharey=True,
-                           layout=[2,1])
-
-    yc=df_res_.center
-    #_df_res_ = df_res
-    df_res_['cen_pos'] = pix*(yc - yc.mean())
-    df_res_.plot( x=td, y = [ 'cen_pos' ],subplots=False,
-                 title=title+'center position',
-            marker='o',c='k', ls = '--', ax=axs2[0],label=str(cuts[0]))
-
-    x=xrange(N)
-    y= yc
-    pol=np.polyfit(x,y,20) #20)
-    polfit=np.polyval(pol,x)
-    yfitted=y-polfit
-
-    df_res_['cen_fitted'] = (yfitted-np.mean(yfitted))*pix
-    #print dd.shape,df_res.cen_fitted.shape
-    i=0
-    mean = (  polfit- np.mean(polfit) )*pix
-    std =  mean.std()
-    #label=str(str(cuts[i]) +' PV: '+str(round(max(polfit)-min(polfit),2))+ 'um   rms: +/-'+str(  round(std0,2))+'um' )
-
-    label=str(str(cuts[i])
-        +' Center: '+str( round(max(polfit)-min(polfit),2) )+ 'um   rms: +/-'
-        +str(  round(std,2))+'um' )
-
-    axs2[0].plot( td, np.zeros( len(td) ) + std, c='red',ls='--',lw=4)
-    axs2[0].plot( td, np.zeros( len(td) )- std,  c='red',ls='--',lw=4)
-
-    axs2[0].text(  .3,.9,label,transform=axs2[0].transAxes)
-    df_res_['cen_polyfit'] = (polfit-np.mean(polfit))*pix
-
-    df_res_.plot( x=td, y = [ 'cen_polyfit' ],subplots=False,
-                 title=title+'Drift of center position',
-            marker='',c='b', ls = '-', lw=3, ax=axs2[0],label=label)
-
-
-    #label=str( str(cuts[i]) +' PV: '+ str(round(max(yfitted)-min(yfitted),2)) +  'um   rms: +/-'+str(round(( (yfitted-np.mean(yfitted))*pix ).std(),2))+'um'  )
-
-    mean = (  yfitted- np.mean(yfitted) )*pix
-    std =  mean.std()
-    label=str(str(cuts[i])
-        +'PV: '+str( round(max(polfit)-min(polfit),2) )+ 'um   rms: +/-'
-        +str(  round(std,2))+'um' )
-
-    axs2[1].text(  .3,.9,label,transform=axs2[1].transAxes)
-    axs2[1].plot( td, np.zeros( len(td) ) + std, c='red',ls='--',lw=4)
-    axs2[1].plot( td, np.zeros( len(td) ) - std, c='red',ls='--',lw=4)
-
-    df_res_.plot( x=td, y = [ 'cen_fitted' ],subplots=False,
-                title=title+'drift corrected vibrations',
-            marker='+',c='b', ls = '-', ax=axs2[1],label=label)
-
-
-    axs2[1].set_xlabel('time')
-    xfmt = md.DateFormatter('%m-%d %H:%M')
-    axs2[1].xaxis.set_major_formatter(xfmt)
-
-    axs[n].set_xlabel('time')
-    xfmt = md.DateFormatter('%m-%d %H:%M')
-    axs[n].xaxis.set_major_formatter(xfmt)
-
-
-    if FFT:
-
-        x,y0 =  get_fft( tf, df_res_['cen_pos'])
-        x,y1 = get_fft( tf, df_res_['cen_fitted'])
-        x,y2 = get_fft( tf, df_res_['cen_polyfit'])
-        df_y = trans_data_to_pd(
-            [x,y0,y1,y2],label=['freqs, Hz','fft_cen_pos',
-                    'fft_cen_fitted','fft_cen_polyfit'
-                        ],dtype='list')
-
-        df_y.plot(subplots=True,x='freqs, Hz',logx=True, y=['fft_cen_pos',
-                    'fft_cen_fitted','fft_cen_polyfit'], title=title + 'FFT')
-
-
-    #return df_y
+# def plot_line_focus2(df_res,cuts,pix=0.79,title=None,
+#             times=None, ROI=None, FFT=True):
+#     from matplotlib import pyplot as plt
+#     import numpy as np
+#     import time,datetime
+#     import pandas.tools.plotting as ptg
+#     import matplotlib.dates as md
+#     import pandas as pd
+#     if ROI is not None:
+#         x1,x2=ROI
+#     else:
+#         x1,x2=0,len(times)
+#
+#     times_ = times[x1:x2]
+#     df_res_ = df_res.loc[x1:x2-1]
+#     df_res_.index = range( 0, x2-x1 )
+#
+#     N=len(times_)
+#     keys = df_res.keys()
+#     M = len(keys)
+#     td=times_
+#     tf =  trans_td_to_tf( td )
+#
+#     if title==None:title='LF_'
+#     fig,axs=ptg._subplots( M, sharex=True,sharey=False,
+#                            layout=[M,1])
+#     axs[0].set_title(title)
+#     for n in range(M):
+#         df_res_.plot( x=td, y = [ keys[n] ],subplots=False,
+#                 marker='o',c='b', ls = '--', ax=axs[n])
+#
+#
+#     #do analysis _center
+#
+#     fig2,axs2=ptg._subplots( 2, sharex=True,sharey=True,
+#                            layout=[2,1])
+#
+#     yc=df_res_.center
+#     #_df_res_ = df_res
+#     df_res_['cen_pos'] = pix*(yc - yc.mean())
+#     df_res_.plot( x=td, y = [ 'cen_pos' ],subplots=False,
+#                  title=title+'center position',
+#             marker='o',c='k', ls = '--', ax=axs2[0],label=str(cuts[0]))
+#
+#     x=xrange(N)
+#     y= yc
+#     pol=np.polyfit(x,y,20) #20)
+#     polfit=np.polyval(pol,x)
+#     yfitted=y-polfit
+#
+#     df_res_['cen_fitted'] = (yfitted-np.mean(yfitted))*pix
+#     #print dd.shape,df_res.cen_fitted.shape
+#     i=0
+#     mean = (  polfit- np.mean(polfit) )*pix
+#     std =  mean.std()
+#     #label=str(str(cuts[i]) +' PV: '+str(round(max(polfit)-min(polfit),2))+ 'um   rms: +/-'+str(  round(std0,2))+'um' )
+#
+#     label=str(str(cuts[i])
+#         +' Center: '+str( round(max(polfit)-min(polfit),2) )+ 'um   rms: +/-'
+#         +str(  round(std,2))+'um' )
+#
+#     axs2[0].plot( td, np.zeros( len(td) ) + std, c='red',ls='--',lw=4)
+#     axs2[0].plot( td, np.zeros( len(td) )- std,  c='red',ls='--',lw=4)
+#
+#     axs2[0].text(  .3,.9,label,transform=axs2[0].transAxes)
+#     df_res_['cen_polyfit'] = (polfit-np.mean(polfit))*pix
+#
+#     df_res_.plot( x=td, y = [ 'cen_polyfit' ],subplots=False,
+#                  title=title+'Drift of center position',
+#             marker='',c='b', ls = '-', lw=3, ax=axs2[0],label=label)
+#
+#
+#     #label=str( str(cuts[i]) +' PV: '+ str(round(max(yfitted)-min(yfitted),2)) +  'um   rms: +/-'+str(round(( (yfitted-np.mean(yfitted))*pix ).std(),2))+'um'  )
+#
+#     mean = (  yfitted- np.mean(yfitted) )*pix
+#     std =  mean.std()
+#     label=str(str(cuts[i])
+#         +'PV: '+str( round(max(polfit)-min(polfit),2) )+ 'um   rms: +/-'
+#         +str(  round(std,2))+'um' )
+#
+#     axs2[1].text(  .3,.9,label,transform=axs2[1].transAxes)
+#     axs2[1].plot( td, np.zeros( len(td) ) + std, c='red',ls='--',lw=4)
+#     axs2[1].plot( td, np.zeros( len(td) ) - std, c='red',ls='--',lw=4)
+#
+#     df_res_.plot( x=td, y = [ 'cen_fitted' ],subplots=False,
+#                 title=title+'drift corrected vibrations',
+#             marker='+',c='b', ls = '-', ax=axs2[1],label=label)
+#
+#
+#     axs2[1].set_xlabel('time')
+#     xfmt = md.DateFormatter('%m-%d %H:%M')
+#     axs2[1].xaxis.set_major_formatter(xfmt)
+#
+#     axs[n].set_xlabel('time')
+#     xfmt = md.DateFormatter('%m-%d %H:%M')
+#     axs[n].xaxis.set_major_formatter(xfmt)
+#
+#
+#     if FFT:
+#
+#         x,y0 =  get_fft( tf, df_res_['cen_pos'])
+#         x,y1 = get_fft( tf, df_res_['cen_fitted'])
+#         x,y2 = get_fft( tf, df_res_['cen_polyfit'])
+#         df_y = trans_data_to_pd(
+#             [x,y0,y1,y2],label=['freqs, Hz','fft_cen_pos',
+#                     'fft_cen_fitted','fft_cen_polyfit'
+#                         ],dtype='list')
+#
+#         df_y.plot(subplots=True,x='freqs, Hz',logx=True, y=['fft_cen_pos',
+#                     'fft_cen_fitted','fft_cen_polyfit'], title=title + 'FFT')
+#
+#
+#     #return df_y
 
 
 
@@ -1136,7 +1107,8 @@ def plot_line_focus(res,cuts,pix=1,epochtime='false', times=None):
     plt.xlabel(x_str)
 
 def read_camonitor(filename,epoch='true'):
-    import tkinter, tkFileDialog
+    from tkinter import filedialog as tkFileDialog
+    import tkinter
     import time
     import numpy as np
     import datetime
@@ -1171,7 +1143,8 @@ def knife_edge(filename, direction='horz', cuts=[1,2,3], firstim=0, lastim=1,pix
     function to analyse knife edge image data for e.g. stability
     """
     from PIL import Image
-    import tkinter, tkFileDialog
+    import tkinter
+    from tkinter import filedialog as tkFileDialog
     from matplotlib import pyplot as plt
     import numpy as np
     from scipy.optimize import curve_fit

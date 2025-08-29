@@ -35,7 +35,7 @@ def xpcs_count(detectors, *, md=None):
         # Insert an 'Event' document into databroker. Now we can access the (partial) dataset.
         yield from bp.save()
         # *Now* wait for the detector to actual finish acquisition.
-        yield from bp.wait()  
+        yield from bp.wait()
 
     return (yield from inner_xpcs())
 
@@ -64,17 +64,17 @@ def move_E(energy, gap=[], xtal="Si111cryo", gapmode="auto", harm=5, gap_offset=
 	print('moving ivu_gap to '+str(gap)[:6]+'mm   and dcm.b to '+str(th_B)[:6]+'deg')
 	RE(mov(ivu_gap,gap,dcm.b,th_B))
 	print('Done! New X-ray energy is '+ str(dcm.en.user_readback.value/1000)+'keV')
-	
 
 
-def E_scan(energy, gap=[], xtal="Si111cryo", gapmode="auto",harm=5, det=elm.sum_all): 
+
+def E_scan(energy, gap=[], xtal="Si111cryo", gapmode="auto",harm=5, det=elm.sum_all):
 	"""
 	energy scan: Scanning both Bragg axis and gap of IVU in a linked fashion
 	calling sequence: E_scan(energy, gap=[], xtal="Si111cryo", gapmode="auto", harm=5 det=elm.sum_all.value)
 	energy: X-ray energy in [keV] & xtal define the Bragg angles used in the scan via xf.get_Bragg(); NOTE: energy must be a LIST!!
 	gap: manually entered list of gap values with gapmode="manual" OR calculated from xf.get_gap(energy, harm, default id map) with gapmode="auto"
 	to-do: allow detector selection from 'detselect()'
-	by LW June 2016	
+	by LW June 2016
 	"""
 	from cycler import cycler
 	#from bluesky import PlanND
@@ -85,7 +85,7 @@ def E_scan(energy, gap=[], xtal="Si111cryo", gapmode="auto",harm=5, det=elm.sum_
 			print('using manually entered gap values...')
 		else: print('error: length of manually entered list of gap value does not match number of energy points')
 	elif gapmode =="auto":
-		gap=list(xf.get_gap(energy,harmonic=harm))  
+		gap=list(xf.get_gap(energy,harmonic=harm))
 		print('using calculated gap values from xfuncs!')
 	gap = np.array(gap)#*1000 %removed factor 1000 (LW, 10/22/20)
 	inner = cycler(dcm.b,th_B)+cycler(ivu_gap,gap)
@@ -104,7 +104,7 @@ def match_IVU_energy(harm=7,xtal='Si111cryo'):
 
 
 
-def Energy_scan(energy, gap=[], xtal="Si111cryo", gapmode="auto",harm=5, det=[eiger1m_single]): 
+def Energy_scan(energy, gap=[], xtal="Si111cryo", gapmode="auto",harm=5, det=[eiger1m_single]):
 	"""
     Energy_scan(energy, gap=[], xtal="Si111cryo", gapmode="auto",harm=5, det=[eiger1m_single]):
     energy scan: Scanning both Bragg axis and gap of IVU in a linked fashion
@@ -112,7 +112,7 @@ def Energy_scan(energy, gap=[], xtal="Si111cryo", gapmode="auto",harm=5, det=[ei
 	energy: np.array!!! ;X-ray energy in [keV] & xtal define the Bragg angles used in the scan via xf.get_Bragg()
 	gap: manually entered list of gap values with gapmode="manual" OR calculated from xf.get_gap(energy, harm, default id map) with gapmode="auto"
 	to-do: allow detector selection from 'detselect()'
-	by LW June 2016	
+	by LW June 2016
 	"""
 	from cycler import cycler
 	#from bluesky import PlanND
@@ -124,7 +124,7 @@ def Energy_scan(energy, gap=[], xtal="Si111cryo", gapmode="auto",harm=5, det=[ei
 			print('using manually entered gap values...')
 		else: print('error: length of manually entered list of gap value does not match number of energy points')
 	elif gapmode =="auto":
-		gap=list(xf.get_gap(energy.tolist(),harmonic=harm))  
+		gap=list(xf.get_gap(energy.tolist(),harmonic=harm))
 		print('using calculated gap values from xfuncs!')
 		print(gap)
 	inner = cycler(dcm.b,th_B)+cycler(ivu_gap,gap)
@@ -132,9 +132,9 @@ def Energy_scan(energy, gap=[], xtal="Si111cryo", gapmode="auto",harm=5, det=[ei
 	plan = scan_nd(det,inner)
 	#RE(plan, [LiveTable([dcm.b,ivu_gap,det]),LivePlot(x='dcm_b',y=det.name,fig = plt.figure())])
 	RE(plan)
-	
-	
-def Energy_scan_debug(energy, gap=[], xtal="Si111cryo", gapmode="auto",harm=5, det=[eiger1m_single]): 
+
+
+def Energy_scan_debug(energy, gap=[], xtal="Si111cryo", gapmode="auto",harm=5, det=[eiger1m_single]):
 	"""
     Energy_scan(energy, gap=[], xtal="Si111cryo", gapmode="auto",harm=5, det=[eiger1m_single]):
     energy scan: Scanning both Bragg axis and gap of IVU in a linked fashion
@@ -142,7 +142,7 @@ def Energy_scan_debug(energy, gap=[], xtal="Si111cryo", gapmode="auto",harm=5, d
 	energy: X-ray energy in [keV] & xtal define the Bragg angles used in the scan via xf.get_Bragg()
 	gap: manually entered list of gap values with gapmode="manual" OR calculated from xf.get_gap(energy, harm, default id map) with gapmode="auto"
 	to-do: allow detector selection from 'detselect()'
-	by LW June 2016	
+	by LW June 2016
 	"""
 	from cycler import cycler
 	#from bluesky import PlanND
@@ -154,7 +154,7 @@ def Energy_scan_debug(energy, gap=[], xtal="Si111cryo", gapmode="auto",harm=5, d
 			print('using manually entered gap values...')
 		else: print('error: length of manually entered list of gap value does not match number of energy points')
 	elif gapmode =="auto":
-		gap=list(xf.get_gap(energy,harm))  
+		gap=list(xf.get_gap(energy,harm))
 		print('using calculated gap values from xfuncs!')
 		print(gap)
 	inner = cycler(dcm.b,th_B)+cycler(ivu_gap,gap)
@@ -163,46 +163,46 @@ def Energy_scan_debug(energy, gap=[], xtal="Si111cryo", gapmode="auto",harm=5, d
 	#RE(plan, [LiveTable([dcm.b,ivu_gap,det]),LivePlot(x='dcm_b',y=det.name,fig = plt.figure())])
 	#RE(plan)
 	return plan, inner
-	
-		
+
+
 
 #### crude test only!!! ####
 def refl_scan(incident_angle):
 	from cycler import cycler
-	from bluesky import PlanND
+	import bluesky.plans as bp
 	det=eiger1m_single
 	inner = cycler(diff.phh,-1*incident_angle)+cycler(diff.gam,-2*incident_angle)
-	plan = PlanND([det],inner)
+	plan = bp.scan_nd([det],inner)
 	RE(plan, [LiveTable([diff.phh,diff.gam,det]),LivePlot(x='diff_phi',y=det.name+"_stats1_total",fig = plt.figure())])
 	### Live plot su$$$s!!! -> plot after the fact...
 	dat=get_table(db[-1])
 	plt.figure(97)
 	plt.semilogy(dat.diff_phh,dat.eiger1m_single_stats1_total)
 
-	
-	
-	
-			
+
+
+
+
 def samy_dscan(start, end, points):
     """
     sampley relative scan using the eiger1m_single detector
     achieves a y motion by combining the incline (diff.xv) and diff.zh
     calling sequence: samy_dscan(start, end, points)
     Note - its a relative scan, start and end are relative from current position
-    by YZ, AF Oct 2016	
+    by YZ, AF Oct 2016
     """
     from cycler import cycler
-    from bluesky import PlanND
+    import bluesky.plans as bp
     initial_xv = diff.xv.user_readback.value
     initial_zh = diff.xh.user_readback.value
     suffix="_stats1_total"
     det=eiger1m_single
     angle=9.0*np.pi/180.0
     dy_values= np.linspace( start, end, points)
-    xv_values = dy_values/np.sin( angle ) + initial_xv 
+    xv_values = dy_values/np.sin( angle ) + initial_xv
     zh_values = -1* dy_values/np.tan( angle ) + initial_zh
     inner = cycler(diff.xv, xv_values)+cycler(diff.xh, zh_values)
-    plan = PlanND([det],inner)
+    plan = bp.scan_nd([det],inner)
     RE(plan, [LiveTable([diff.xv,diff.xh,det  ]),LivePlot(x='diff_xv',y=det.name+suffix,fig = plt.figure())])
     diff.xv.set(initial_xv)
     diff.xh.set(initial_zh)
@@ -263,7 +263,7 @@ RE.subscribe(print_scan_id())
 def relabel_figure(fig, new_title):
     fig.set_label(new_title)
     fig.canvas.manager.window.setWindowTitle(new_title)
-    
+
 
 from suitcase.utils import MultiFileManager
 from suitcase.specfile import Serializer
@@ -308,7 +308,7 @@ def new_spec_file(name):
     calling sequence: new_spec_file(name='xyz')
     """
     spec_factory.file_prefix = name
- 
+
 
 def reload_macro(filename):
     get_ipython().magic("%run -i ~/.ipython/profile_collection/startup/" + filename)
