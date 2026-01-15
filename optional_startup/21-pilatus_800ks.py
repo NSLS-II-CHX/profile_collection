@@ -157,7 +157,6 @@ class Pilatus800V33(PilatusV33):
         TIFFPluginWithFileStorePilatus,
         suffix="TIFF1:",
         write_path_template="",
-        root="",
     )
 
     def stage(self, *args, **kwargs):
@@ -274,3 +273,7 @@ def count_no_save_plan(det):
 
 # pilatus_name = pilatus300
 # pilatus_Epicsname = '{Det:SAXS}'
+
+#### setup fast shutter @CHX
+caput('XF:11IDB-ES{Det:P800k}cam1:ShutterOpenEPICS.OUT','XF:11IDB-ES{Zebra}:SOFT_IN:B0 NPP NMS')
+caput('XF:11IDB-ES{Det:P800k}cam1:ShutterCloseEPICS.OUT','XF:11IDB-ES{Zebra}:SOFT_IN:B0 NPP NMS')

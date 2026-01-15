@@ -56,7 +56,7 @@ tiled_inserter = TiledInserter()
 # The function below initializes RE and subscribes tiled_inserter to it
 nslsii.configure_base(get_ipython().user_ns,
                tiled_inserter,
-               publish_documents_with_kafka=True,)
+               publish_documents_with_kafka=False,)
 
 print("Initializing Tiled reading client...\nMake sure you check for duo push.")
 tiled_reading_client = from_profile("nsls2", username=None, include_data_sources=True)["chx"]["raw"]

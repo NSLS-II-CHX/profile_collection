@@ -22,10 +22,10 @@ def check_past_data(uid,bpm_int_threshold=-1,fraction=.05,verbose=False):
     if  fr > fraction:
         beam_lost = True
         if verbose:
-            print('during data acquisition for uid %s BPM intensity was > %s for %0f percent of the time -> beam lost during data acquisition: %s'%(uid[:8],bpm_int_threshold,fr*100,beam_lost))
+            print('during data acquisition for uid %s BPM current was > %s for %0f percent of the time -> beam lost during data acquisition: %s'%(uid[:8],bpm_int_threshold,fr*100,beam_lost))
     else:
         if verbose:
-            print('during data acquisition for uid %s BPM intensity was < %s for %0f percent of the time -> beam lost during data acquisition: %s'%(uid[:8],bpm_int_threshold,fr*100,beam_lost))
+            print('during data acquisition for uid %s BPM current was > %s for %0f percent of the time -> beam was lost during data acquisition: %s'%(uid[:8],bpm_int_threshold,fr*100,beam_lost))
     return beam_lost
 
 def check_current_beam(bpm_int_threshold=-1,wait_for_beam=True,olog_reporting=False,verbose=True):
@@ -105,6 +105,8 @@ def check_current_beam(bpm_int_threshold=-1,wait_for_beam=True,olog_reporting=Fa
 def test_beam_checks():
     try:
         check_current_beam
+    except: 
+        raise NameError('Need to re-check this macro to ensure check_current_beam is operational!')
     T=[300,270,260]
     for t in T:
         print('set_temperature(%s,cool_ramp=2)'%t)

@@ -26,7 +26,7 @@ def wcount(detector_list=[pilatus800],imnum=[1],exposure_time=[1],acquire_period
     for ii,i in enumerate(detector_list):
         detector=i
         if acquire_period[ii] == 'auto':
-            acquire_period[ii] = exposure_time[ii]+.005
+            acquire_period[ii] = exposure_time[ii]+.01
         i.cam.acquire_time.value=exposure_time[ii]       # setting up exposure for eiger500k/1m/4m_single
         i.cam.acquire_period.value=acquire_period[ii]
         i.cam.num_images.value=imnum[ii]

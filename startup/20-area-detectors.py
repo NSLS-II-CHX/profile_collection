@@ -611,35 +611,45 @@ class EigerManualTrigger(SingleTrigger, EigerBase):
 
 ## This renaming should be reversed: no correspondance between CSS screens, PV names and ophyd....
 xray_eye1 = StandardProsilicaV33('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye1')
+time.sleep(.1) # added by LW 7/7/25 
 xray_eye2 = StandardProsilicaV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
+time.sleep(.1) # added by LW 7/7/25 
 xray_eye3 = StandardProsilicaV33('XF:11IDB-BI{Cam:08}', name='xray_eye3')
+time.sleep(.1) # added by LW 7/7/25 
 xray_eye4 = StandardProsilicaV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
+time.sleep(.1) # added by LW 7/7/25 
 OAV = StandardProsilicaV33('XF:11IDB-BI{Cam:10}', name='OAV')  # beamline OAV using prosilica camera
+time.sleep(.1) # added by LW 7/7/25 
 #OAV = StandardProsilicaV33('XF:11ID-M3{Det-Cam:3}', name='OAV')  # printer OAV using Grasshoper UBS3 camera -> this worked in March 2025
 #OAV = StandardProsilicaV33('XF:11ID-M3{Det-Cam:3}', name='oavcam-2')  # printer OAV using Grasshoper UBS3 camera
 #OAV.stage_sigs[OAV.cam.trigger_mode] = 'Off'
 BCam =  StandardPointGreyV33('XF:11IDB-ES{BFLY-Cam:1}', name='BCam')
-
+time.sleep(.1) # added by LW 7/7/25 
 xray_eye1_writing = StandardProsilicaWithTIFFV33('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye1')
-
+time.sleep(.1) # added by LW 7/7/25 
 xray_eye2_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
-
+time.sleep(.1) # added by LW 7/7/25 
 xray_eye3_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:08}', name='xray_eye3')
-
+time.sleep(.1) # added by LW 7/7/25 
 xray_eye4_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
-
+time.sleep(.1) # added by LW 7/7/25 
 OAV_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:10}', name='OAV')   # beamline OAV using prosilica camera
 #OAV_writing = StandardProsilicaWithTIFFV33('XF:11ID-M3{Det-Cam:3}', name='OAV') # printer OAV using Grasshoper UBS3 camera -> this worked in March 2024
-
+time.sleep(.1) # added by LW 7/7/25 
 #OAV_writing = StandardProsilicaWithTIFFV33('XF:11ID-M3{Det-Cam:3}', name='oavcam-2') # printer OAV using Grasshoper UBS3 camera
 
 BCam_writing =  StandardPointGreyWithTIFFV33('XF:11IDB-ES{BFLY-Cam:1}', name='BCam')
+time.sleep(.1) # added by LW 7/7/25 
 
 fs1 = StandardProsilicaV33('XF:11IDA-BI{FS:1-Cam:1}', name='fs1')
+time.sleep(.1) # added by LW 7/7/25 
 fs2 = StandardProsilicaV33('XF:11IDA-BI{FS:2-Cam:1}', name='fs2')
+time.sleep(.1) # added by LW 7/7/25 
 fs_wbs = StandardProsilicaV33('XF:11IDA-BI{BS:WB-Cam:1}', name='fs_wbs')
+time.sleep(.1) # added by LW 7/7/25 
 # dcm_cam = StandardProsilica('XF:11IDA-BI{Mono:DCM-Cam:1}', name='dcm_cam')
 fs_pbs = StandardProsilicaV33('XF:11IDA-BI{BS:PB-Cam:1}', name='fs_pbs')
+time.sleep(.1) # added by LW 7/7/25 
 # elm = Elm('XF:11IDA-BI{AH401B}AH401B:',)
 
 all_standard_pros = [xray_eye1, xray_eye2, xray_eye3, xray_eye4,

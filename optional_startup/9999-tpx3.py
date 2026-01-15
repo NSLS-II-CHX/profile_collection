@@ -70,7 +70,10 @@ class Tpx3Files(Device):
         # TODO also do the images
         
         self._res_uid = res_uid = new_short_uid()
-        write_path_template = "file:" + assets_path() + "timepix-1/%Y/%m/%d/"
+        #write_path_template = "file:" + assets_path() + "timepix-1/%Y/%m/%d/" ## TEMPORARY HACK BECAUSE OF NETWORK WRITING ISSUE
+        write_path_template = "file:/media/nvme/raw/"
+        print(write_path_template)
+
         self._write_path = write_path = datetime.now().strftime(write_path_template)
         self.raw_filepath.set(write_path).wait()
 
@@ -102,6 +105,9 @@ class Tpx3Files(Device):
         # because we need to flush setting to actual server from IOC
         self.set_settings.set(1).wait()
 
+        self._write_path = "file:/media/nvme/raw/"
+        print(self._write_path)
+
         filenames = [f'{self._write_path}{self._res_uid}_{self._n:05d}_{j:06d}.tpx3' for j in range(self.parent.cam.num_images.get())]
         self._n += 1
         self.raw_filepaths.set(filenames).wait()
@@ -126,8 +132,10 @@ class Tpx3HDF(Device):
     
     def stage(self):
          self.hdf5_create_directory.set(-4)
-         write_path_template = assets_path() + "timepix-1/%Y/%m/%d/"
+         #write_path_template = assets_path() + "timepix-1/%Y/%m/%d/" ## TEMPORARY HACK BECAUSE OF NETWORK WRITING ISSUE
+         write_path_template = "file:/media/nvme/raw/"
          write_path = datetime.now().strftime(write_path_template)
+         print(write_path)
          self.hdf5_file_path.put(write_path)
 
 class TimePixDetector(SingleTriggerV33, AreaDetector):
@@ -187,6 +195,7 @@ class TimePixDetector(SingleTriggerV33, AreaDetector):
 
 
 tpx3 = TimePixDetector("TPX3-TEST:", name="tpx3")
+print("Reloaded tpx3!")
 
 for j in range(1, 5):
     stat = getattr(tpx3, f'stats{j}')
