@@ -518,7 +518,7 @@ class FastShutterTrigger(Device):
     acquire = Cpt(EpicsSignal, 'Acquire-Cmd', trigger_value=1)
 
 
-class EigerFastTrigger(EigerBase):
+class EigerFastTrigger(EigerBaseV33):
     tr = Cpt(FastShutterTrigger, '')
 
     def __init__(self, *args, **kwargs):

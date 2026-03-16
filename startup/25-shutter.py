@@ -22,9 +22,9 @@ class FourPVShutter(Device):
 
 class FourPVShutter(Device):
     open_command = Cpt(EpicsSignal, 'Cmd:Opn-Cmd')
-    open_status = Cpt(EpicsSignal, 'Cmd:Opn-Sts')
+    open_status = Cpt(EpicsSignal, 'Pos-Sts')
     close_command = Cpt(EpicsSignal, 'Cmd:Cls-Cmd')
-    close_status = Cpt(EpicsSignal, 'Cmd:Cls-Sts')
+    close_status = Cpt(EpicsSignal, 'Pos-Sts')
 
     def open(self):
         self.open_command.put(1)
