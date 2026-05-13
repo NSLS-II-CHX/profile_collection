@@ -36,7 +36,7 @@ ophyd-async = ">=0.13.7,<0.14"
 
 
 [feature.profile.pypi-dependencies]
-eiger-io = { git = "https://github.com/nsls-ii/eiger-io" }
+eiger-io = { git = "https://github.com/nsls-ii/eiger-io", rev = "master" }
 pvxslibs = ">=1.3.2, <2"
 chxtools = ">=3.0.3rc2, <4"
 
