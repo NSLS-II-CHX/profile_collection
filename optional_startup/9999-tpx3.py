@@ -17,6 +17,8 @@ import bluesky.plan_stubs as bps
 
 from nslsii.ad33 import SingleTriggerV33
 
+temp_assets_path = '/media/nvme/pass-316251/assets/'
+
 class PreciseDtypeSignal(Signal):
     def describe(self):
         ret = super().describe()
@@ -70,10 +72,7 @@ class Tpx3Files(Device):
         # TODO also do the images
         
         self._res_uid = res_uid = new_short_uid()
-        #write_path_template = "file:" + assets_path() + "timepix-1/%Y/%m/%d/" ## TEMPORARY HACK BECAUSE OF NETWORK WRITING ISSUE
-        write_path_template = "file:/media/nvme/raw/"
-        print(write_path_template)
-
+        write_path_template = "file:" + temp_assets_path + "timepix-1/%Y/%m/%d/"
         self._write_path = write_path = datetime.now().strftime(write_path_template)
         self.raw_filepath.set(write_path).wait()
 
@@ -105,10 +104,7 @@ class Tpx3Files(Device):
         # because we need to flush setting to actual server from IOC
         self.set_settings.set(1).wait()
 
-        self._write_path = "file:/media/nvme/raw/"
-        print(self._write_path)
-
-        filenames = [f'{self._write_path}{self._res_uid}_{self._n:05d}_{j:06d}.tpx3' for j in range(self.parent.cam.num_images.get())]
+        filenames = [f'{self._write_path}/{self._res_uid}/{self._res_uid}_{self._n:05d}_{j:06d}.tpx3' for j in range(self.parent.cam.num_images.get())]
         self._n += 1
         self.raw_filepaths.set(filenames).wait()
 
@@ -132,8 +128,7 @@ class Tpx3HDF(Device):
     
     def stage(self):
          self.hdf5_create_directory.set(-4)
-         #write_path_template = assets_path() + "timepix-1/%Y/%m/%d/" ## TEMPORARY HACK BECAUSE OF NETWORK WRITING ISSUE
-         write_path_template = "file:/media/nvme/raw/"
+         write_path_template = 'file:/' + temp_assets_path + "timepix-1/%Y/%m/%d/"
          write_path = datetime.now().strftime(write_path_template)
          print(write_path)
          self.hdf5_file_path.put(write_path)
@@ -145,8 +140,6 @@ class TimePixDetector(SingleTriggerV33, AreaDetector):
     hdf_plugin = Cpt(Tpx3HDF, "HDF1:")
 
     files = Cpt(Tpx3Files, "cam1:")
-    
-
 
     stats1 = Cpt(StatsPlugin_V34, "Stats1:")
     stats2 = Cpt(StatsPlugin_V34, "Stats2:")
@@ -165,7 +158,7 @@ class TimePixDetector(SingleTriggerV33, AreaDetector):
     
     # def stage(self):
     #     self.hdf5_create_directory.set(-4).wait()
-    #     write_path_template = assets_path() + "timepix-1/%Y/%m/%d/"
+    #     write_path_template = temp_assets_path + "timepix-1/%Y/%m/%d/"
     #     write_path = datetime.now().strftime(write_path_template)
     #     self.hdf5_file_path.set(write_path).wait()
     #     self.files.stage()

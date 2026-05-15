@@ -1,4 +1,6 @@
 from epics import caput,caget
+#sys.path.insert(0, "/nsls2/data/chx/shared/CHX_Software/packages/standard_functions/")
+#from standard_functions import save_pickle, load_pickle
 
 try:
     trigger_signal_pv = 'XF:11ID-CT{M3}bi2' # trigger signal from printer setup

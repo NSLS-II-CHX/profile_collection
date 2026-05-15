@@ -227,6 +227,15 @@ class Diffractometer(Device):
             fields.extend(motor.hints['fields'])
         return {'fields': fields}
 
+class Goniometer(Device):
+    # rot = Cpt(EpicsMotor, '-Ax:X}Mtr') #spare:3
+    # px = Cpt(EpicsMotor, '-Ax:X}Mtr') #spare: 12
+    theta = Cpt(EpicsMotor,'3-Ax:X}Mtr', name='theta')
+    x = Cpt(EpicsMotor,'12-Ax:X}Mtr', name='gonx')
+    y = Cpt(EpicsMotor,'13-Ax:X}Mtr', name='gony')
+    z = Cpt(EpicsMotor,'14-Ax:X}Mtr', name='gonz')
+
+gonzo = Goniometer('XF:11IDB-OP{Spare:',name='gonzo')
 
 
 class XBPM( Device):
@@ -234,7 +243,6 @@ class XBPM( Device):
 xBPM =XBPM( 'XF:11IDB-BI{XBPM:02}', name = 'xBPM' )
 
 diff = Diffractometer('XF:11IDB-ES{Dif', name='diff')
-
 # sample beamstop
 #sambst = XYMotor('XF:11IDB-OP{BS:Samp', name='sambst')
 
