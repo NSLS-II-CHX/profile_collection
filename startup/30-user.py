@@ -1289,21 +1289,11 @@ class Peltier_Cooler(Device):
         self.set_chiller_temperature.put(T)
         print('Chiller temperature set to: %s [C]'%T)
 
+
+
+
+
 peltier = Peltier_Cooler('XF:11ID',name='peltier')
-
-####
-# enable_command_pv = 'XF:11IDB-ES{Pel-IO:1}DO:1-Cmd'
-# enable_status_pv = 'XF:11IDB-ES{Pel-IO:1}DO:1-Sts'
-# set_power_command_pv = 'XF:11ID-CT{Peltier:1}ai2'
-# setup_power_pv = 'XF:11ID-CT{Peltier:1}ai2.DESC'
-# setup_hot_side_max_pv = 'XF:11ID-CT{Peltier:1}ai3.DESC'
-# set_hot_side_max_pv = 'XF:11ID-CT{Peltier:1}ai3'
-# setup_chiller_temperature_pv = 'XF:11ID-CT{Peltier:1}ai1.DESC'
-# set_chiller_temperature_pv = 'XF:11ID-CT{Peltier:1}ai1'
-# setup_peltier_enabled_pv = 'XF:11ID-CT{Peltier:1}bi9.DESC'
-
-# def peltier_setup():
-#     caput 
 
 
   
