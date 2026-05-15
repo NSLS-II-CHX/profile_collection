@@ -1,6 +1,5 @@
-import nslsii
-import redis
 import os
+import nslsii
 from bluesky import RunEngine
 nslsii.configure_base(
     get_ipython().user_ns,
@@ -19,28 +18,14 @@ EpicsSignalBase.set_defaults(timeout=60, connection_timeout=60)  # new style
 from IPython import get_ipython
 from IPython.terminal.prompts import Prompts, Token
 
-class ProposalIDPrompt(Prompts):
-    def in_prompt_tokens(self, cli=None):
-        return [
-            (
-                Token.Prompt,
-                f"{RE.md.get('data_session', 'N/A')} [",
-            ),
-            (Token.PromptNum, str(self.shell.execution_count)),
-            (Token.Prompt, "]: "),
-        ]
-
-
-ip = get_ipython()
-ip.prompts = ProposalIDPrompt(ip)
-
-
 # Configure a Tiled writing client
 tiled_writing_client = from_profile("nsls2", api_key=os.environ["TILED_BLUESKY_WRITING_API_KEY_CHX"])["chx"]["raw"]
 
+
 class TiledInserter:
-    
-    name = 'chx'
+
+    name = "chx"
+
     def insert(self, name, doc):
         ATTEMPTS = 20
         error = None
@@ -57,6 +42,7 @@ class TiledInserter:
             # Out of attempts
             raise error
 
+
 tiled_inserter = TiledInserter()
 
 # The function below initializes RE and subscribes tiled_inserter to it
@@ -70,11 +56,25 @@ tiled_reading_client = from_profile("nsls2", username=None, include_data_sources
 db = Broker(tiled_reading_client)
 
 # set plot properties for 4k monitors
-plt.rcParams['figure.dpi']=200
+plt.rcParams["figure.dpi"] = 200
 
-# Set the metadata dictionary
-RE.md = RedisJSONDict(redis.Redis("info.chx.nsls2.bnl.gov"), prefix="")
 
 # Setup the path to the secure assets folder for the current proposal
 def assets_path():
     return f"/nsls2/data/chx/proposals/{RE.md['cycle']}/{RE.md['data_session']}/assets/"
+
+
+class ProposalIDPrompt(Prompts):
+    def in_prompt_tokens(self, cli=None):
+        return [
+            (
+                Token.Prompt,
+                f"{RE.md.get('data_session', 'N/A')} [",
+            ),
+            (Token.PromptNum, str(self.shell.execution_count)),
+            (Token.Prompt, "]: "),
+        ]
+
+
+ip = get_ipython()
+ip.prompts = ProposalIDPrompt(ip)
