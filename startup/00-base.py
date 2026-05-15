@@ -1,6 +1,12 @@
 import nslsii
 import redis
 import os
+from bluesky import RunEngine
+nslsii.configure_base(
+    get_ipython().user_ns,
+    'chx',
+    publish_documents_with_kafka=False
+)
 
 import time
 from redis_json_dict import RedisJSONDict
