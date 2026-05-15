@@ -79,7 +79,7 @@ class PilatusDetectorCamV33(PilatusDetectorCam):
 class PilatusV33(SingleTriggerV33, PilatusDetector):
     cam = Cpt(PilatusDetectorCamV33, "cam1:")
     image = Cpt(ImagePlugin, "image1:")
-    # stats1 = Cpt(StatsPluginV33, "Stats1:")  # commented these, trying to gain speed
+    # stats1 = Cpt(StatsPluginV33, "Stats1:")
     # stats2 = Cpt(StatsPluginV33, "Stats2:")
     # stats3 = Cpt(StatsPluginV33, "Stats3:")
     # stats4 = Cpt(StatsPluginV33, "Stats4:")
@@ -114,7 +114,7 @@ class PilatusV33(SingleTriggerV33, PilatusDetector):
 class Pilatus800V33(SingleTriggerV33, PilatusDetector):
     cam = Cpt(PilatusDetectorCamV33, "cam1:")
     image = Cpt(ImagePlugin, "image1:")
-    # stats1 = Cpt(StatsPluginV33, "Stats1:")  # try to disable these for speed...
+    # stats1 = Cpt(StatsPluginV33, "Stats1:")
     # stats2 = Cpt(StatsPluginV33, "Stats2:")
     # stats3 = Cpt(StatsPluginV33, "Stats3:")
     # stats4 = Cpt(StatsPluginV33, "Stats4:")
@@ -170,8 +170,7 @@ if Pilatus800_on == True:
     pilatus800.tiff.read_attrs = []
     #pilatus800.stats3.total.kind = "hinted"
     #pilatus800.stats4.total.kind = "hinted"
-    #STATS_NAMES = ["stats1", "stats2", "stats3", "stats4", "stats5"]
-    STATS_NAMES = []
+    STATS_NAMES = []# ["stats1", "stats2", "stats3", "stats4", "stats5"]
     pilatus800.read_attrs = ["tiff"] + STATS_NAMES
     # for stats_name in STATS_NAMES:
     #     stats_plugin = getattr(pilatus800, stats_name)

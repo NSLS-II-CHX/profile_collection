@@ -130,6 +130,7 @@ class Tpx3HDF(Device):
          self.hdf5_create_directory.set(-4)
          write_path_template = 'file:/' + temp_assets_path + "timepix-1/%Y/%m/%d/"
          write_path = datetime.now().strftime(write_path_template)
+         print(write_path)
          self.hdf5_file_path.put(write_path)
 
 class TimePixDetector(SingleTriggerV33, AreaDetector):
@@ -187,6 +188,7 @@ class TimePixDetector(SingleTriggerV33, AreaDetector):
 
 
 tpx3 = TimePixDetector("TPX3-TEST:", name="tpx3")
+print("Reloaded tpx3!")
 
 for j in range(1, 5):
     stat = getattr(tpx3, f'stats{j}')
