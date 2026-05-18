@@ -4,6 +4,9 @@ name = "chx-profile-collection"
 platforms = ["linux-64"]
 version = "2026.2.0"
 
+[activation.env]
+REDIS_HOST = "xf11id1-chx-redis1.nsls2.bnl.gov"
+
 [system-requirements]
 libc = "2.17"
 
