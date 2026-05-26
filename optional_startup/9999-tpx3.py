@@ -40,7 +40,7 @@ class Tpx3Files(Device):
     raw_file_template = Cpt(
         EpicsSignalWithRBV, "RawFileTemplate", string=True, kind="config"
     )
-    raw_write_enable = Cpt(EpicsSignalWithRBV, "WriteRaw", string=True, kind="omitted")
+    raw_write_enable = Cpt(EpicsSignalWithRBV, "WriteRaw", string=True, kind="omitted", put_complete=True)
 
     img_filepath = Cpt(EpicsSignalWithRBV, "ImgFilePath", kind="config")
     img_file_template = Cpt(EpicsSignalWithRBV, "ImgFileTemplate", kind="config")
@@ -111,6 +111,9 @@ class Tpx3Files(Device):
         # TODO reset these to their original values rather than junk
         self.raw_filepath.set('file:/media/nvme/raw/').wait()
         self.raw_file_template.set(f"garbage").wait()
+        # self.raw_write_enable.set(0).wait()
+        print("put complete: ", self.raw_write_enable.put_complete)
+        # self.raw_write_enable.put(0)
         self.raw_write_enable.set(0).wait()
         # caput("XF:11ID1-ES{TPX:1}cam1:WriteRaw", "0")
         # time.sleep(0.5)
