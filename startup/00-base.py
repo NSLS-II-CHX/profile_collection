@@ -14,6 +14,7 @@ from IPython.terminal.prompts import Prompts, Token
 
 # Configure a Tiled writing client
 tiled_writing_client = from_profile("nsls2", api_key=os.environ["TILED_BLUESKY_WRITING_API_KEY_CHX"])["chx"]["raw"]
+tiled_writing_client.context.http_client.headers['tiled-qos'] = 'acquisition'
 
 
 class TiledInserter:
@@ -48,6 +49,7 @@ nslsii.configure_base(get_ipython().user_ns,
 
 print("Initializing Tiled reading client...\nMake sure you check for duo push.")
 tiled_reading_client = from_profile("nsls2", username=None, include_data_sources=True)["chx"]["raw"]
+tiled_reading_client.context.http_client.headers['tiled-qos'] = 'acquisition'
 
 db = Broker(tiled_reading_client)
 
