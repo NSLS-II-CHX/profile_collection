@@ -299,7 +299,8 @@ bpm2 = XYMotor('XF:11IDB-BI{BPM:2', name='bpm2')
 
 w1 = XYMotor('XF:11IDB-OP{Win:1', name='w1')  # window positioners
 hdm = HorizontalDiffractionMirror('XF:11IDA-OP{Mir:HDM', name='hdm')
-s2=VirtualMotorSlits('XF:11IDB-OP{Slt:BDS', name='s2')  #new beam defining slit (based on SmarAct)
+s2=VirtualMotorSlits('XF:11IDB-OP{Slt:BDS', name='s2')  # bds object defines as \'s2\' (for back compatibility of macros..)
+bds = VirtualMotorCenterAndGap('XF:11IDB-OP{Slt:BDS', name='bds')  #Smaract beam defining slits with a better name than s2
 gsl = VirtualMotorCenterAndGap('XF:11IDB-OP{Slt:Guard', name='gsl')  #Guard rSlits (SmarAct)
 #gsl = VirtualMotorSlits('XF:11IDB-OP{Slt:Guard', name='gsl')  #Guard rSlits (SmarAct)
 
