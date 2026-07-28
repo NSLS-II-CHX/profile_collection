@@ -68,8 +68,8 @@ def backup_md(md_dict,backup_dict_path,md_filename,verbose=False):
     t=str(datetime.now(ZoneInfo("America/New_York"))) # remove one datetime for beamline...
     json_filename = backup_dict_path+md_filename+t.split()[0]+'_%s_%s_%s.json'%(t.split()[1].split(':')[0],t.split()[1].split(':')[1],t.split()[1].split(':')[2].split('.')[0])
     ### need to deal with redis specific datatypes and convert them to something sensible:
-    r=str(redis.StrictRedis(md_dict))
-    md_dict = dict(literal_eval(r.split('host=')[1].split(',port')[0]))
+    ##r=str(redis.StrictRedis(md_dict))  # commented cycle 2026-2 to restore functionality
+    ##md_dict = dict(literal_eval(r.split('host=')[1].split(',port')[0]))
     
     if not os.path.exists(backup_dict_path):
         os.makedirs(backup_dict_path)
@@ -144,7 +144,7 @@ def manage_metadata(action=None,verbose=True,**kwargs):
     backup_dict_path = '/home/xf11id/CHX_metadata_backups/'
     md_filename = 'CHX_md_backup_'
     # what to do with data session? what's the default?
-    keep_list = ['scan_id','cycle','sample','auto_pipeline','beam_position_dict','OAV_resolution [um_pixel]','data_session','beamline_id','owner','username','user_group','start_datetime', 'proposal']
+    keep_list = ['scan_id','cycle','sample','auto_pipeline','beam_position_dict','OAV_resolution [um_pixel]','data_session','beamline_id','owner','username','user_group','start_datetime', 'proposal','tiled_access_tags','versions']
     default_dict = {'sample':'none','auto_pipeline':'none','OAV_resolution [um_pixel]':'N.A.','user':'CHX_staff','user_group':[]}
 
     md_dict=dict(RE.md)

@@ -153,6 +153,30 @@ def goto_beamline_pos(position_key='none',interactive=True):
         print("new_set={'_id':'new-set_name','positions':{'diff_yh':.2,'diff_xh':-1.3,'diff_zh':4.5,'sample_x':.4}}")
         print("beamline_pos.insert_one(new_set)")
 
+def get_beamline_pos(position_key = 'none',interactive = True):
+    """
+    complementary function to 'goto_beamline_pos' -> just return dictionary with motor names and positions
+    """
+    reg_axes=reg_axes=['diff_xh','diff_yh','diff_zh','diff_gam','det_x','det_y','diff_Del','diff_gam']
+    sm_axes=['foil_x','sample_x']
+    
+    print('defined sets of beamline positions available: ')
+    all_pos=beamline_pos.find().distinct('_id')
+    print(all_pos)
+       
+    if interactive:
+        user_input_set = input('Pick set to move to positions: ')
+    else: 
+        user_input_set = position_key
+    if user_input_set in all_pos:
+        print('Current positions defined in ',user_input_set+':')
+        pos = beamline_pos.find_one({'_id':user_input_set})
+        print(pos)
+        return pos['positions']
+    else:
+        raise Exception('Sorry, requested set "%s"of beamline positions is not (yet) available!'%user_input_set)
+
+
 def get_focus(mount,holder):
     """
     currently only implemented for sample mount 'multi'
