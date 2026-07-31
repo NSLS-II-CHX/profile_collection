@@ -70,7 +70,7 @@ class Tpx3Files(Device):
         # TODO also do the images
         
         self._res_uid = res_uid = new_short_uid()
-        write_path_template = "file:" + assets_path() + "timepix-1/%Y/%m/%d/"
+        write_path_template = "file:" + assets_path() + "timepix-2/%Y/%m/%d/"
         self._write_path = write_path = datetime.now().strftime(write_path_template)
         self.raw_filepath.set(write_path).wait()
 
@@ -131,7 +131,7 @@ class Tpx3HDF(Device):
     
     def stage(self):
          self.hdf5_create_directory.set(-4)
-         write_path_template = assets_path() + "timepix-1/%Y/%m/%d/"
+         write_path_template = assets_path() + "timepix-2/%Y/%m/%d/"
          write_path = datetime.now().strftime(write_path_template)
          self.hdf5_file_path.put(write_path)
 
@@ -191,15 +191,16 @@ class TimePixDetector(SingleTriggerV33, AreaDetector):
         yield from self.set_num_images(num_frames)      
 
 
-tpx3_1 = TimePixDetector("XF:11ID1-ES{TPX:1}", name="tpx3_1")
+tpx3_2 = TimePixDetector("XF:11ID1-ES{TPX:2}", name="tpx3_2")
+
 print("Reloaded tpx3!")
 
 for j in range(1, 5):
-    stat = getattr(tpx3_1, f'stats{j}')
+    stat = getattr(tpx3_2, f'stats{j}')
     stat.kind = 'normal'
     stat.total.kind = 'hinted'
     stat.ts_total.kind = 'normal'
 
     
 for j in [1, 2, 3, 4]:
-    getattr(tpx3_1, f'stats{j}').nd_array_port.set(f'ROI{j}')
+    getattr(tpx3_2, f'stats{j}').nd_array_port.set(f'ROI{j}')
