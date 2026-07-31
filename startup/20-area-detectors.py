@@ -54,10 +54,10 @@ class TIFFPluginWithFileStore(TIFFPlugin, FileStoreTIFFIterativeWrite):
         if color_mode == 'Mono':
             ret[key]['shape'] = [
                 self.parent.cam.num_images.get(),
-                self.array_size.depth.get(),
+                1,
                 self.array_size.height.get(),
-                self.array_size.width.get()
-                ]
+                self.array_size.width.get(),
+            ]
 
         elif color_mode in ['RGB1', 'Bayer']:
             ret[key]['shape'] = [self.parent.cam.num_images.get(), *self.array_size.get()]
