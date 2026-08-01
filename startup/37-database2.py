@@ -153,6 +153,79 @@ def goto_beamline_pos(position_key='none',interactive=True):
         print("new_set={'_id':'new-set_name','positions':{'diff_yh':.2,'diff_xh':-1.3,'diff_zh':4.5,'sample_x':.4}}")
         print("beamline_pos.insert_one(new_set)")
 
+
+def goto_beamline_pos_v2(position_key='none', interactive=True):
+    """
+    Move to a named beamline position set.
+
+    Behavior:
+    - Same user interaction and printed messages as before.
+    - Resolves all axes first.
+    - Executes one RE(mv(...)) call so all moves are started together.
+    """
+    print('defined sets of beamline positions available: ')
+    all_pos = beamline_pos.find().distinct('_id')
+    print(all_pos)
+
+    def _resolve_axis(axis_name):
+        # Match the old eval-based behavior:
+        # 1) try dotted-object form, e.g. diff_xh -> diff.xh
+        # 2) then try a direct global, e.g. foil_x
+        if '_' in axis_name:
+            base, leaf = axis_name.rsplit('_', 1)
+            try:
+                parent = globals()[base]
+                return getattr(parent, leaf)
+            except Exception:
+                pass
+
+        try:
+            return globals()[axis_name]
+        except KeyError as exc:
+            raise KeyError(axis_name) from exc
+
+    if interactive:
+        user_input_set = input('Pick set to move to positions: ')
+    else:
+        user_input_set = position_key
+
+    if user_input_set not in all_pos:
+        print('Sorry, requested set of beamline positions is not (yet) available!\n How to add a new set: ')
+        print("new_set={'_id':'new-set_name','positions':{'diff_yh':.2,'diff_xh':-1.3,'diff_zh':4.5,'sample_x':.4}}")
+        print("beamline_pos.insert_one(new_set)")
+        return
+
+    doc = beamline_pos.find_one({'_id': user_input_set})
+    print('Current positions defined in ' + user_input_set + ':')
+    print(doc)
+
+    if interactive:
+        input_update = input('Move to this set of motor positions? yes/no: ')
+    else:
+        input_update = 'yes'
+
+    if input_update != 'yes':
+        return
+
+    positions = doc['positions']
+    move_args = []
+
+    # Resolve everything first so we do not partially move if one axis is bad.
+    for axis_name, new_val in positions.items():
+        try:
+            motor = _resolve_axis(axis_name)
+        except Exception:
+            raise update_exception(
+                'ERROR: axis ' + axis_name + ' not defined in function "goto_beamline_pos"\n'
+                'NOT all positions were reached!'
+            )
+
+        print('moving ' + axis_name + ':   ' + str(new_val))
+        move_args.extend([motor, new_val])
+
+    # Single RE call: all move requests go out together.
+    RE(mv(*move_args))
+
 def get_beamline_pos(position_key = 'none',interactive = True):
     """
     complementary function to 'goto_beamline_pos' -> just return dictionary with motor names and positions
