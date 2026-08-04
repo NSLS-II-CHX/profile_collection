@@ -67,7 +67,11 @@ class TIFFPluginWithFileStore(TIFFPlugin, FileStoreTIFFIterativeWrite):
         type_map = {'UInt8': '|u1', 'UInt16': '<u2', 'Float32':'<f4', "Float64":'<f8'}
         if cam_dtype in type_map:
             ret[key].setdefault('dtype_str', type_map[cam_dtype])
-
+            # Suggest chunks to override heuristics which turn out to be way off
+            # for this case.
+            # TODO: Verify that this should include the *whole* shape;
+            #       maybe it should only be shape[1:].
+            ret[key].setdefault('chunks', [1] + list(ret[key]['shape']))
 
         return ret
 
