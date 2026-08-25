@@ -2,10 +2,11 @@ import os
 import nslsii
 from bluesky import RunEngine
 import time
+import numpy as np
+import pandas as pd
 from redis_json_dict import RedisJSONDict
 from tiled.client import from_profile
 from ophyd.signal import EpicsSignalBase
-from databroker import Broker
 
 EpicsSignalBase.set_defaults(timeout=60, connection_timeout=60)  # new style
 
@@ -51,7 +52,40 @@ print("Initializing Tiled reading client...\nMake sure you check for duo push.")
 tiled_reading_client = from_profile("nsls2", username=None, include_data_sources=True)["chx"]["raw"]
 tiled_reading_client.context.http_client.headers['tiled-qos'] = 'acquisition'
 
-db = Broker(tiled_reading_client)
+db = tiled_reading_client
+
+
+def get_run_start(run):
+    return run.metadata["start"]
+
+
+def get_run_descriptors(run):
+    return run.metadata["descriptors"]
+
+
+def get_run_data(run, stream_name="primary"):
+    return run[stream_name]["data"]
+
+
+def get_fields(run, stream_name="primary"):
+    return list(get_run_data(run, stream_name).keys())
+
+
+def get_table(run, fields=None, stream_name="primary"):
+    ds = get_run_data(run, stream_name)
+    keys = list(ds.keys()) if fields is None else fields
+    data = {}
+    for key in keys:
+        value = ds[key].read().squeeze()
+        array = value.to_numpy() if hasattr(value, "to_numpy") else np.asarray(value)
+        if fields is None and array.ndim > 1:
+            continue
+        data[key] = np.atleast_1d(array)
+    return pd.DataFrame(data)
+
+
+def get_images(run, field, stream_name="primary"):
+    return get_run_data(run, stream_name)[field].read()
 
 # set plot properties for 4k monitors
 plt.rcParams["figure.dpi"] = 200

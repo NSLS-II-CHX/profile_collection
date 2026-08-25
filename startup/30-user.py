@@ -56,13 +56,14 @@ def update_metadata(uid,update_dict,verbose=False):
     EXAMPLE: update_metadata(123456,{'weather':'rainy','mood':'moody'},verbose=True)
     """
     exclude_list = ['uid','scan_id', 'time'] # we should not overwrite these
-    h=db[uid].v2
+    h=db[uid]
+    start = get_run_start(h)
     for k in update_dict.keys():
         action=None
         if k in exclude_list:
             print(colored('SORRY: we cannot overwrite metadata for %s'%k,'red'))
-        elif k in list(h.start.keys()):
-                action = "replace"; action_='replaced '; detail='%s: %s -> %s'%(k,h.start[k],update_dict[k])
+        elif k in list(start.keys()):
+                action = "replace"; action_='replaced '; detail='%s: %s -> %s'%(k,start[k],update_dict[k])
         else:
             action = "add"; action_='added '; detail='%s : %s'%(k,update_dict[k])
         if action is not None:
@@ -82,10 +83,10 @@ def get_beam_center_update( uid = -1, threshold = 200  ):
     
     '''
     hdr = tiled_reading_client[uid]
-    keys = [k for k, v in hdr.descriptors[0]['data_keys'].items()     if 'external' in v]
-    det = keys[0]    
+    keys = [k for k, v in get_run_descriptors(hdr)[0]['data_keys'].items()     if 'external' in v]
+    det = keys[0]
     print('The detector is %s.'%det)
-    imgs = list(tiled_reading_client[uid].data(det))[0]
+    imgs = get_images(hdr, det)
     if det =='eiger1m_single_image':
         Chip_Mask=np.load( '/XF11ID/analysis/2017_1/masks/Eiger1M_Chip_Mask.npy')
         img = imgs[0]
@@ -970,9 +971,10 @@ def check_uid():
         print(l)
         if scan_add is None:
             h=tiled_reading_client[-(l+1)]
-            for d in range(len(h.start['plan_args']['detectors'])):
-                if detector.name in h.start['plan_args']['detectors'][d]: scan_add=l+1
-    uid_add=tiled_reading_client[-scan_add]['start']['uid']   
+            start = get_run_start(h)
+            for d in range(len(start['plan_args']['detectors'])):
+                if detector.name in start['plan_args']['detectors'][d]: scan_add=l+1
+    uid_add=get_run_start(tiled_reading_client[-scan_add])['uid']
 
     
     
@@ -1230,7 +1232,7 @@ def series_old(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,c
     ####### add acquired uid to database list for automatic compression #########
     if auto_compression:
         try:
-            uid_add=tiled_reading_client[-1]['start']['uid']
+            uid_add=get_run_start(tiled_reading_client[-1])['uid']
             uid_list=data_acquisition_collection.find_one({'_id':'general_list'})['uid_list']
             uid_list.append(uid_add)
             data_acquisition_collection.update_one({'_id': 'general_list'},{'$set':{'uid_list' : uid_list}})

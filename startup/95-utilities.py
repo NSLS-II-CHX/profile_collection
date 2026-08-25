@@ -10,10 +10,6 @@ import datetime as dtt
 import time
 import numpy as np
 from PIL import Image
-# from databroker import db, get_fields, get_images, get_table
-get_fields = db.get_fields
-get_images = db.get_images
-get_table = db.get_table
 from matplotlib import pyplot as pltfrom
 from lmfit import  Model
 from lmfit import minimize, Parameters, Parameter, report_fit
@@ -448,15 +444,15 @@ from Maksim
 
 
 def get_scan(scan_id, debug=False):
-    """Get scan from databroker using provided scan id.
+    """Get scan from Tiled using provided scan id.
 from Maksim
     :param scan_id: scan id from bluesky.
     :param debug: a debug flag.
     :return: a tuple of scan and timestamp values.
     """
     scan = db[scan_id]
-    #t = datetime.datetime.fromtimestamp(scan['start']['time']).strftime('%Y-%m-%d %H:%M:%S')
-    #t = dtt.datetime.fromtimestamp(scan['start']['time']).strftime('%Y-%m-%d %H:%M:%S')
+    #t = datetime.datetime.fromtimestamp(get_run_start(scan)['time']).strftime('%Y-%m-%d %H:%M:%S')
+    #t = dtt.datetime.fromtimestamp(get_run_start(scan)['time']).strftime('%Y-%m-%d %H:%M:%S')
     t='N.A. conflicting with other macro'
     if debug:
         print(scan)
@@ -476,7 +472,7 @@ def ps(uid='-1',det='default',suffix='default',shift=.5,logplot='off',figure_num
     #import time
     #import numpy as np
     #from PIL import Image
-    #from databroker import db, get_fields, get_images, get_table
+    # get_fields, get_images, and get_table are Tiled helpers from 00-base.py
     #from matplotlib import pyplot as pltfrom
     #from lmfit import  Model
     #from lmfit import minimize, Parameters, Parameter, report_fit
@@ -486,15 +482,16 @@ def ps(uid='-1',det='default',suffix='default',shift=.5,logplot='off',figure_num
     if uid == '-1':
         uid=-1
     h=db[uid]
+    start = get_run_start(h)
     if det == 'default':
-        if h.start['detectors'][0] == 'elm' and suffix=='default':
+        if start['detectors'][0] == 'elm' and suffix=='default':
             intensity_field='elm_sum_all'
-        elif h.start['detectors'][0] == 'elm':
+        elif start['detectors'][0] == 'elm':
             intensity_field='elm'+suffix
         elif suffix == 'default':
-            intensity_field= h.start['detectors'][0]+'_stats1_total'
+            intensity_field= start['detectors'][0]+'_stats1_total'
         else:
-            intensity_field= h.start['detectors'][0]+suffix
+            intensity_field= start['detectors'][0]+suffix
     else:
         if det=='elm' and suffix == 'default':
             intensity_field='elm_sum_all'
@@ -505,7 +502,7 @@ def ps(uid='-1',det='default',suffix='default',shift=.5,logplot='off',figure_num
         else:
             intensity_field=det+suffix
 
-    field = h.start['motors'][0]
+    field = start['motors'][0]
 
     #field='dcm_b';intensity_field='elm_sum_all'
     [x,y,t]=get_data(uid,field=field, intensity_field=intensity_field, det=None, debug=False)  #need to re-write way to get data
@@ -685,12 +682,11 @@ def export_scan_scalar( uid, x='dcm_b', y= ['xray_eye1_stats1_total'],
         d.plot(x='dcm_b', y = 'xray_eye1_stats1_total', marker='o', ls='-', color='r')
 
     '''
-    from databroker import Broker as db
     #from chxanalys.chx_generic_functions import  trans_data_to_pd
     import numpy as np
     hdr = db[uid]
     print( get_fields( hdr ) )
-    data = db.get_table( db[uid] )
+    data = get_table( db[uid] )
     xp = data[x]
     datap = np.zeros(  [len(xp), len(y)+1])
     datap[:,0] = xp
@@ -742,7 +738,7 @@ def E_calibration(file,Edge='Cu',xtal='Si111cryo',B_off=0):
     by LW 3/25/2015
     function to read energy scan file and determine offset correction
     calling sequence: E_calibration(file,Edge='Cu',xtal='Si111cryo',B_off=0)
-    file: path/filename of experimental data; 'ia' opens interactive dialog; file can be databrooker object, e.g. file=db[-1] t process data from last scan
+    file: path/filename of experimental data; 'ia' opens interactive dialog; file can be Tiled run object, e.g. file=db[-1] to process data from last scan
     Edge: elment used for calibration
     xtal: monochromator crystal under calibration
     B_off (optional): apply offset to Bragg angle data
@@ -754,6 +750,7 @@ def E_calibration(file,Edge='Cu',xtal='Si111cryo',B_off=0):
     import matplotlib.pyplot as plt
     #import xfuncs as xf
     #import Tkinter, tkFileDialog
+    tiled_run=0
 
     if file=='ia':          # open file dialog
         print('this would open a file input dialog IF Tkinter was available in the $%^& python environment as it used to')
@@ -765,12 +762,13 @@ def E_calibration(file,Edge='Cu',xtal='Si111cryo',B_off=0):
         file_path=file
         descritpion=file_path
     #elif isinstance(file,dict) and 'start' in file.keys():	# some genius decided that db[-1] is no longer a dictionary....
-    elif 'start' in file.keys():
-       databroker_object=1
-       description='scan # ',file.start['scan_id'],' uid: ', file.start['uid'][:10]
+    elif hasattr(file, "metadata") and "start" in file.metadata:
+       tiled_run=1
+       start = get_run_start(file)
+       description='scan # ',start['scan_id'],' uid: ', start['uid'][:10]
     plt.close("all")
     Edge_data={'Cu': 8.979, 'Ti': 4.966}
-    if databroker_object !=1:
+    if tiled_run !=1:
        Bragg=[]
        Gap=[]
        Intensity=[]
@@ -786,10 +784,10 @@ def E_calibration(file,Edge='Cu',xtal='Si111cryo',B_off=0):
                except: print('could not convert: ',row[5])
                try: Intensity.append(float(row[7]))
                except: print('could not convert: ',row[8])
-    elif databroker_object==1:
+    elif tiled_run==1:
        data = get_table(file)
        Bragg = data.dcm_b[1:]     #retrive the data (first data point is often "wrong", so don't use
-       #Gap = data.SR:C11-ID:G1{IVU20:1_readback[1:] name is messed up in databroker -> currently don't use gap
+       #Gap = data.SR:C11-ID:G1{IVU20:1_readback[1:] name is currently not used
        Intensity = data.elm_sum_all [1:] 			#need to find signal from electrometer...elm is commented out in detectors at the moment...???
 
 
@@ -925,7 +923,6 @@ def get_ID_calibration_dan(gapstart,gapstop,gapstep=.2,gapoff=0):
     """
     import numpy as np
     #import xfuncs as xf
-    #from dataportal import DataBroker as db, StepScan as ss, DataMuxer as dm
     import time
     from epics import caput, caget
     from matplotlib import pyplot as plt
@@ -1042,7 +1039,6 @@ def get_ID_calibration(gapstart,gapstop,gapstep=.2,gapoff=0):
     """
     import numpy as np
     #import xfuncs as xf
-    #from dataportal import DataBroker as db, StepScan as ss, DataMuxer as dm
     import time
     from epics import caput, caget
     from matplotlib import pyplot as plt
@@ -1165,15 +1161,17 @@ def retrieve_latest_scan(uid='-1',det='default',suffix='default'):
     # get the scan information:
     if uid == '-1':
         uid=-1
+    run = db[uid]
+    start = get_run_start(run)
     if det == 'default':
-        if db[uid].start.detectors[0] == 'elm' and suffix=='default':
+        if start['detectors'][0] == 'elm' and suffix=='default':
             intensity_field='elm_sum_all'
-        elif db[uid].start.detectors[0] == 'elm':
+        elif start['detectors'][0] == 'elm':
             intensity_field='elm'+suffix
         elif suffix == 'default':
-            intensity_field= db[uid].start.detectors[0]+'_stats1_total'
+            intensity_field= start['detectors'][0]+'_stats1_total'
         else:
-            intensity_field= db[uid].start.detectors[0]+suffix
+            intensity_field= start['detectors'][0]+suffix
     else:
         if det=='elm' and suffix == 'default':
             intensity_field='elm_sum_all'
@@ -1184,7 +1182,7 @@ def retrieve_latest_scan(uid='-1',det='default',suffix='default'):
         else:
             intensity_field=det+suffix
 
-    field = db[uid].start.motors[0]
+    field = start['motors'][0]
 
     #field='dcm_b';intensity_field='elm_sum_all'
     [x,y,t]=get_data(uid,field=field, intensity_field=intensity_field, det=None, debug=False)  #need to re-write way to get data

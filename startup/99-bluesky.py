@@ -32,7 +32,7 @@ def xpcs_count(detectors, *, md=None):
             yield from bp.trigger(det)
             # Read the UID that points to this dataset in progress.
             yield from bp.read(det)
-        # Insert an 'Event' document into databroker. Now we can access the (partial) dataset.
+        # Insert an 'Event' document. Now we can access the (partial) dataset.
         yield from bp.save()
         # *Now* wait for the detector to actual finish acquisition.
         yield from bp.wait()
