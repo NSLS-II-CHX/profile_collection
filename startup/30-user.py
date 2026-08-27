@@ -83,8 +83,7 @@ def get_beam_center_update( uid = -1, threshold = 200  ):
     
     '''
     hdr = tiled_reading_client[uid]
-    keys = [k for k, v in get_run_descriptors(hdr)[0]['data_keys'].items()     if 'external' in v]
-    det = keys[0]
+    det = get_run_start(hdr)['detectors'][0]
     print('The detector is %s.'%det)
     imgs = get_images(hdr, det)
     if det =='eiger1m_single_image':

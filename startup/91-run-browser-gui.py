@@ -5,7 +5,7 @@ def f(header, factory):
     plan_name = start['plan_name']
     if plan_name in ('dscan', 'relative_scan'):
         motor, = start['motors']
-        data_keys = get_run_descriptors(header)[0]['data_keys']
+        data_keys = get_fields(header)
         for key in data_keys:
             if key.endswith('stats1_total'):
                 break

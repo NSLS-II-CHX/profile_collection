@@ -59,10 +59,6 @@ def get_run_start(run):
     return run.metadata["start"]
 
 
-def get_run_descriptors(run):
-    return run.metadata["descriptors"]
-
-
 def get_run_data(run, stream_name="primary"):
     return run[stream_name]["data"]
 
