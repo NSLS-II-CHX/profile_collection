@@ -1,7 +1,9 @@
-def get_sid_filenames(header):
+def get_sid_filenames(header): 
     """YG. Dev Jan, 2016
     ---------------- DEPRECATED -----------------
     Get a bluesky scan_id, unique_id, filename by giveing uid
+
+    August 2026: This function didn't work before (Broker object has no attribute 'get_resource_uids'), but when CHX is moved to the Tiled SQL database we can update this to use the data sources and work.
         
     Parameters
     ----------
