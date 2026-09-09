@@ -5,7 +5,6 @@ import time
 from redis_json_dict import RedisJSONDict
 from tiled.client import from_profile
 from ophyd.signal import EpicsSignalBase
-from databroker import Broker
 
 EpicsSignalBase.set_defaults(timeout=60, connection_timeout=60)  # new style
 
@@ -51,7 +50,26 @@ print("Initializing Tiled reading client...\nMake sure you check for duo push.")
 tiled_reading_client = from_profile("nsls2", username=None, include_data_sources=True)["chx"]["raw"]
 tiled_reading_client.context.http_client.headers['tiled-qos'] = 'acquisition'
 
-db = Broker(tiled_reading_client)
+db = tiled_reading_client
+
+
+def get_fields(run, stream_name="primary"):
+    fields = (
+        field
+        for descriptor in run[stream_name].descriptors
+        for field in descriptor["data_keys"]
+    )
+    return list(dict.fromkeys(fields))
+
+
+def get_table(run, stream_name="primary", fields=None):
+    stream = run[stream_name]
+    dataset = stream.read() if fields is None else stream.read(variables=fields)
+    return dataset.to_dataframe()
+
+
+def get_images(run, field, stream_name="primary"):
+    return run[stream_name].read(variables=[field])[field]
 
 # set plot properties for 4k monitors
 plt.rcParams["figure.dpi"] = 200

@@ -32,7 +32,7 @@ def xpcs_count(detectors, *, md=None):
             yield from bp.trigger(det)
             # Read the UID that points to this dataset in progress.
             yield from bp.read(det)
-        # Insert an 'Event' document into databroker. Now we can access the (partial) dataset.
+        # Insert an 'Event' document. Now we can access the (partial) dataset.
         yield from bp.save()
         # *Now* wait for the detector to actual finish acquisition.
         yield from bp.wait()
@@ -175,7 +175,7 @@ def refl_scan(incident_angle):
 	plan = bp.scan_nd([det],inner)
 	RE(plan, [LiveTable([diff.phh,diff.gam,det]),LivePlot(x='diff_phi',y=det.name+"_stats1_total",fig = plt.figure())])
 	### Live plot su$$$s!!! -> plot after the fact...
-	dat=get_table(db[-1])
+	dat=get_table(db[db.keys().last()])
 	plt.figure(97)
 	plt.semilogy(dat.diff_phh,dat.eiger1m_single_stats1_total)
 

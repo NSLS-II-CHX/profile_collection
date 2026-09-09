@@ -8,13 +8,10 @@ from IPython.display import clear_output
 
 mongo_uri = f"mongodb://{os.environ['MONGO_USER_CHX']}:{os.environ['MONGO_PASSWORD_CHX']}@mongo1.nsls2.bnl.gov,mongo2.nsls2.bnl.gov,mongo3.nsls2.bnl.gov"
 cli = pymongo.MongoClient(mongo_uri)
-#cli = pymongo.MongoClient(os.environ["DATABROKER_HOST"])
 
 samples_2 = cli.get_database('chx-samples').get_collection('samples_2')
 data_acquisition_collection = cli.get_database('chx-samples').get_collection('data_acquisition_collection')
 beamline_pos = cli.get_database('chx-samples').get_collection('beamline_pos')
-from databroker import Broker                                                   
-#db = Broker.named('temp')  # for real applications, 'temp' would be 'chx' 
 print('available databases:')
 print(cli.list_database_names())
 print('\n available collection in database samples:')
@@ -403,7 +400,7 @@ def acquisition_from_database(acquisition_database_obid,error_mode='try',focus_c
                                 
                                 # fake some data acquisition to get a uid:
                                 #RE(count([eiger1m_single]))   # this will become series!!
-                                uid=tiled_reading_client[-1]['start']['uid']
+                                uid=tiled_reading_client.keys().last()
                                 #for ics in tqdm(range(100)):
                                 #    time.sleep(.1)
                                 # add uid to database for compression:

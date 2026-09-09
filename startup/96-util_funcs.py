@@ -512,10 +512,9 @@ def get_archive_pv_value(PV, label, start_time, end_time,scan_archives=True,
 
 
 def test_db( sid ):
-    from databroker import Broker as db
     h = db[sid]
-    scan = db.get_table( h )
-    fld = db.get_fields( h )
+    scan = get_table( h )
+    fld = get_fields( h )
     print( 'the scan files include %s'%fld)
 
 

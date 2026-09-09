@@ -56,13 +56,14 @@ def update_metadata(uid,update_dict,verbose=False):
     EXAMPLE: update_metadata(123456,{'weather':'rainy','mood':'moody'},verbose=True)
     """
     exclude_list = ['uid','scan_id', 'time'] # we should not overwrite these
-    h=db[uid].v2
+    h=db[uid]
+    start_md = h.start
     for k in update_dict.keys():
         action=None
         if k in exclude_list:
             print(colored('SORRY: we cannot overwrite metadata for %s'%k,'red'))
-        elif k in list(h.start.keys()):
-                action = "replace"; action_='replaced '; detail='%s: %s -> %s'%(k,h.start[k],update_dict[k])
+        elif k in list(start_md.keys()):
+                action = "replace"; action_='replaced '; detail='%s: %s -> %s'%(k,start_md[k],update_dict[k])
         else:
             action = "add"; action_='added '; detail='%s : %s'%(k,update_dict[k])
         if action is not None:
@@ -71,21 +72,51 @@ def update_metadata(uid,update_dict,verbose=False):
                 print(colored('%s: '%action_,'green')+colored('%s'%detail,'yellow')) 
     
 
-def get_beam_center_update( uid = -1, threshold = 200  ):
+def get_beam_center_update(uid=-1, threshold=200, detector_field=None):
     '''Find the beam center on detector and update the PV accordingly
        The image is masked by pixel mask and the known pixel masks
     Input:
         uid: string or integer, e.g, -1 is the last data
         threshold: the max intensity on the detector, if less, will not update beam center
+        detector_field: image field to use. If omitted, the run must contain exactly
+            one image field.
     Output:
         None
-    
+
     '''
+    if uid in (-1, '-1'):
+        uid = tiled_reading_client.keys().last()
     hdr = tiled_reading_client[uid]
-    keys = [k for k, v in hdr.descriptors[0]['data_keys'].items()     if 'external' in v]
-    det = keys[0]    
+    image_fields = [
+        field
+        for field in get_fields(hdr)
+        if field == 'image' or field.lower().endswith('_image')
+    ]
+    if detector_field is None:
+        if len(image_fields) != 1:
+            raise ValueError(
+                'Specify detector_field when the run does not contain exactly one '
+                'image field. Available image fields: %s' % image_fields
+            )
+        detector_field = image_fields[0]
+    else:
+        detector_field = getattr(detector_field, 'name', detector_field)
+        normalized_detector_field = detector_field.casefold()
+        matches = [
+            field
+            for field in image_fields
+            if field.casefold() == normalized_detector_field
+            or field.casefold().startswith(normalized_detector_field + '_')
+        ]
+        if len(matches) != 1:
+            raise ValueError(
+                'Could not uniquely match detector_field %r. Available image fields: %s'
+                % (detector_field, image_fields)
+            )
+        detector_field = matches[0]
+    det = detector_field
     print('The detector is %s.'%det)
-    imgs = list(tiled_reading_client[uid].data(det))[0]
+    imgs = get_images(hdr, det)
     if det =='eiger1m_single_image':
         Chip_Mask=np.load( '/XF11ID/analysis/2017_1/masks/Eiger1M_Chip_Mask.npy')
         img = imgs[0]
@@ -965,14 +996,19 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
 
 
 def check_uid():
-    scan_add = None
-    for l in range(10): # with multithreading, other uids might have completed before this one, e.g. with Pilatus 800k WAXS detector -> need to find last uid that uses same detector as this series
+    uid_add = None
+    recent_uids = tiled_reading_client.keys().tail(10)
+    for l, uid in enumerate(reversed(recent_uids)): # with multithreading, other uids might have completed before this one, e.g. with Pilatus 800k WAXS detector -> need to find last uid that uses same detector as this series
         print(l)
-        if scan_add is None:
-            h=tiled_reading_client[-(l+1)]
-            for d in range(len(h.start['plan_args']['detectors'])):
-                if detector.name in h.start['plan_args']['detectors'][d]: scan_add=l+1
-    uid_add=tiled_reading_client[-scan_add]['start']['uid']   
+        h=tiled_reading_client[uid]
+        start_md = h.start
+        for detector_name in start_md['plan_args']['detectors']:
+            if detector.name in detector_name:
+                uid_add = uid
+                break
+        if uid_add is not None:
+            break
+    return uid_add
 
     
     
@@ -1230,7 +1266,7 @@ def series_old(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,c
     ####### add acquired uid to database list for automatic compression #########
     if auto_compression:
         try:
-            uid_add=tiled_reading_client[-1]['start']['uid']
+            uid_add=tiled_reading_client.keys().last()
             uid_list=data_acquisition_collection.find_one({'_id':'general_list'})['uid_list']
             uid_list.append(uid_add)
             data_acquisition_collection.update_one({'_id': 'general_list'},{'$set':{'uid_list' : uid_list}})
