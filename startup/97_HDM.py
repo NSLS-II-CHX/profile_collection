@@ -15,12 +15,12 @@ def take_Rdata( voltage, E):
     hdm.y.user_setpoint.value = RH_STRIPE
     sleep( 3.0 )
     E_scan(list(E))
-    hrh=db[-1]
+    hrh=db[db.keys().last()]
     #yield from bp.abs_set(hdm.y, Si_STRIPE)
     hdm.y.user_setpoint.value = SI_STRIPE
     sleep( 3.0 )
     E_scan(list(E))
-    hsi=db[-1]
+    hsi=db[db.keys().last()]
     return get_R( hsi, hrh )
 
 def get_R(header_si, header_rh):		
@@ -63,6 +63,4 @@ def get_Rdata( voltage_CHA, E ):
         ax.plot(E,R_SiRh/R_SiRh[1:5].mean(),label="%s V, %s urad"%(voltage,HDM_Encoder) )
     ax.legend()
     return R
-
-
 

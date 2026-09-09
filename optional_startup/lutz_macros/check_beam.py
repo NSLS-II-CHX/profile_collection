@@ -117,7 +117,7 @@ def test_beam_checks():
             print('newspot()')
             check_current_beam(bpm_int_threshold=-1,wait_for_beam=True)
             print('series(expt=.1,imnum=200,....)')
-            waiting_for_data = check_past_data(get_run_start(db[-1])['uid'],bpm_int_threshold=-1,fraction=.05,verbose=True)
+            waiting_for_data = check_past_data(db.keys().last(),bpm_int_threshold=-1,fraction=.05,verbose=True)
         print('\n\n\n next temperature! \n\n')
 
 print('successfully loaded check_beam.py ....')

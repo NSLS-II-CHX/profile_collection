@@ -175,7 +175,7 @@ def refl_scan(incident_angle):
 	plan = bp.scan_nd([det],inner)
 	RE(plan, [LiveTable([diff.phh,diff.gam,det]),LivePlot(x='diff_phi',y=det.name+"_stats1_total",fig = plt.figure())])
 	### Live plot su$$$s!!! -> plot after the fact...
-	dat=get_table(db[-1])
+	dat=get_table(db[db.keys().last()])
 	plt.figure(97)
 	plt.semilogy(dat.diff_phh,dat.eiger1m_single_stats1_total)
 

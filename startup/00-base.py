@@ -2,8 +2,6 @@ import os
 import nslsii
 from bluesky import RunEngine
 import time
-import numpy as np
-import pandas as pd
 from redis_json_dict import RedisJSONDict
 from tiled.client import from_profile
 from ophyd.signal import EpicsSignalBase
@@ -55,33 +53,23 @@ tiled_reading_client.context.http_client.headers['tiled-qos'] = 'acquisition'
 db = tiled_reading_client
 
 
-def get_run_start(run):
-    return run.metadata["start"]
-
-
-def get_run_data(run, stream_name="primary"):
-    return run[stream_name]["data"]
-
-
 def get_fields(run, stream_name="primary"):
-    return list(get_run_data(run, stream_name).keys())
+    fields = (
+        field
+        for descriptor in run[stream_name].descriptors
+        for field in descriptor["data_keys"]
+    )
+    return list(dict.fromkeys(fields))
 
 
-def get_table(run, fields=None, stream_name="primary"):
-    ds = get_run_data(run, stream_name)
-    keys = list(ds.keys()) if fields is None else fields
-    data = {}
-    for key in keys:
-        value = ds[key].read().squeeze()
-        array = value.to_numpy() if hasattr(value, "to_numpy") else np.asarray(value)
-        if fields is None and array.ndim > 1:
-            continue
-        data[key] = np.atleast_1d(array)
-    return pd.DataFrame(data)
+def get_table(run, stream_name="primary", fields=None):
+    stream = run[stream_name]
+    dataset = stream.read() if fields is None else stream.read(variables=fields)
+    return dataset.to_dataframe()
 
 
 def get_images(run, field, stream_name="primary"):
-    return get_run_data(run, stream_name)[field].read()
+    return run[stream_name].read(variables=[field])[field]
 
 # set plot properties for 4k monitors
 plt.rcParams["figure.dpi"] = 200

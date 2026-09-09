@@ -400,7 +400,7 @@ def acquisition_from_database(acquisition_database_obid,error_mode='try',focus_c
                                 
                                 # fake some data acquisition to get a uid:
                                 #RE(count([eiger1m_single]))   # this will become series!!
-                                uid=get_run_start(tiled_reading_client[-1])['uid']
+                                uid=tiled_reading_client.keys().last()
                                 #for ics in tqdm(range(100)):
                                 #    time.sleep(.1)
                                 # add uid to database for compression:

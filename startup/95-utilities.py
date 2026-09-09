@@ -10,7 +10,7 @@ import datetime as dtt
 import time
 import numpy as np
 from PIL import Image
-from matplotlib import pyplot as pltfrom
+from matplotlib import pyplot as plt
 from lmfit import  Model
 from lmfit import minimize, Parameters, Parameter, report_fit
 from scipy.special import erf
@@ -451,8 +451,8 @@ from Maksim
     :return: a tuple of scan and timestamp values.
     """
     scan = db[scan_id]
-    #t = datetime.datetime.fromtimestamp(get_run_start(scan)['time']).strftime('%Y-%m-%d %H:%M:%S')
-    #t = dtt.datetime.fromtimestamp(get_run_start(scan)['time']).strftime('%Y-%m-%d %H:%M:%S')
+    #t = datetime.datetime.fromtimestamp(scan.start['time']).strftime('%Y-%m-%d %H:%M:%S')
+    #t = dtt.datetime.fromtimestamp(scan.start['time']).strftime('%Y-%m-%d %H:%M:%S')
     t='N.A. conflicting with other macro'
     if debug:
         print(scan)
@@ -473,25 +473,25 @@ def ps(uid='-1',det='default',suffix='default',shift=.5,logplot='off',figure_num
     #import numpy as np
     #from PIL import Image
     # get_fields, get_images, and get_table are Tiled helpers from 00-base.py
-    #from matplotlib import pyplot as pltfrom
+    #from matplotlib import pyplot as plt
     #from lmfit import  Model
     #from lmfit import minimize, Parameters, Parameter, report_fit
     #from scipy.special import erf
 
     # get the scan information:
-    if uid == '-1':
-        uid=-1
+    if uid in (-1, '-1'):
+        uid = db.keys().last()
     h=db[uid]
-    start = get_run_start(h)
+    start_md = h.start
     if det == 'default':
-        if start['detectors'][0] == 'elm' and suffix=='default':
+        if start_md['detectors'][0] == 'elm' and suffix=='default':
             intensity_field='elm_sum_all'
-        elif start['detectors'][0] == 'elm':
+        elif start_md['detectors'][0] == 'elm':
             intensity_field='elm'+suffix
         elif suffix == 'default':
-            intensity_field= start['detectors'][0]+'_stats1_total'
+            intensity_field= start_md['detectors'][0]+'_stats1_total'
         else:
-            intensity_field= start['detectors'][0]+suffix
+            intensity_field= start_md['detectors'][0]+suffix
     else:
         if det=='elm' and suffix == 'default':
             intensity_field='elm_sum_all'
@@ -502,7 +502,7 @@ def ps(uid='-1',det='default',suffix='default',shift=.5,logplot='off',figure_num
         else:
             intensity_field=det+suffix
 
-    field = start['motors'][0]
+    field = start_md['motors'][0]
 
     #field='dcm_b';intensity_field='elm_sum_all'
     [x,y,t]=get_data(uid,field=field, intensity_field=intensity_field, det=None, debug=False)  #need to re-write way to get data
@@ -764,8 +764,8 @@ def E_calibration(file,Edge='Cu',xtal='Si111cryo',B_off=0):
     #elif isinstance(file,dict) and 'start' in file.keys():	# some genius decided that db[-1] is no longer a dictionary....
     elif hasattr(file, "metadata") and "start" in file.metadata:
        tiled_run=1
-       start = get_run_start(file)
-       description='scan # ',start['scan_id'],' uid: ', start['uid'][:10]
+       start_md = file.start
+       description='scan # ',start_md['scan_id'],' uid: ', start_md['uid'][:10]
     plt.close("all")
     Edge_data={'Cu': 8.979, 'Ti': 4.966}
     if tiled_run !=1:
@@ -987,7 +987,7 @@ def get_ID_calibration_dan(gapstart,gapstop,gapstep=.2,gapoff=0):
         yield from ascan(dcm.b, float(B_guess-.4), float(B_guess+.4), 60,
                          md={'plan_name': 'ID_calibration',
                              'mirror_stripe': stripe})
-        header = db[-1]					#retrive the data (first data point is often "wrong", so don't use
+        header = db[db.keys().last()]			#retrieve the data (first data point is often "wrong", so don't use
         data = get_table(header)
         B = data.dcm_b[2:]
         intdat = data.xray_eye1_stats1_total[2:]
@@ -1103,7 +1103,7 @@ def get_ID_calibration(gapstart,gapstop,gapstep=.2,gapoff=0):
         print('hurray, made it up to here!')
         print('about to collect data')
         RE(ascan(dcm.b, float(B_guess-.4), float(B_guess+.4), 60))
-        header = db[-1]					#retrive the data (first data point is often "wrong", so don't use
+        header = db[db.keys().last()]			#retrieve the data (first data point is often "wrong", so don't use
         data = get_table(header)
         B = data.dcm_b[2:]
         intdat = data.xray_eye1_stats1_total[2:]
@@ -1159,19 +1159,19 @@ def retrieve_latest_scan(uid='-1',det='default',suffix='default'):
 
     '''
     # get the scan information:
-    if uid == '-1':
-        uid=-1
+    if uid in (-1, '-1'):
+        uid = db.keys().last()
     run = db[uid]
-    start = get_run_start(run)
+    start_md = run.start
     if det == 'default':
-        if start['detectors'][0] == 'elm' and suffix=='default':
+        if start_md['detectors'][0] == 'elm' and suffix=='default':
             intensity_field='elm_sum_all'
-        elif start['detectors'][0] == 'elm':
+        elif start_md['detectors'][0] == 'elm':
             intensity_field='elm'+suffix
         elif suffix == 'default':
-            intensity_field= start['detectors'][0]+'_stats1_total'
+            intensity_field= start_md['detectors'][0]+'_stats1_total'
         else:
-            intensity_field= start['detectors'][0]+suffix
+            intensity_field= start_md['detectors'][0]+suffix
     else:
         if det=='elm' and suffix == 'default':
             intensity_field='elm_sum_all'
@@ -1182,7 +1182,7 @@ def retrieve_latest_scan(uid='-1',det='default',suffix='default'):
         else:
             intensity_field=det+suffix
 
-    field = start['motors'][0]
+    field = start_md['motors'][0]
 
     #field='dcm_b';intensity_field='elm_sum_all'
     [x,y,t]=get_data(uid,field=field, intensity_field=intensity_field, det=None, debug=False)  #need to re-write way to get data
