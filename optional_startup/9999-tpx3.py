@@ -70,7 +70,7 @@ class Tpx3Files(Device):
         # TODO also do the images
         
         self._res_uid = res_uid = new_short_uid()
-        write_path_template = "file:" + assets_path() + "timepix-1/%Y/%m/%d/"
+        write_path_template = "file:" + assets_path() + f"{self.parent.assets_name}/%Y/%m/%d/"
         self._write_path = write_path = datetime.now().strftime(write_path_template)
         self.raw_filepath.set(write_path).wait()
 
@@ -131,7 +131,7 @@ class Tpx3HDF(Device):
     
     def stage(self):
          self.hdf5_create_directory.set(-4)
-         write_path_template = assets_path() + "timepix-1/%Y/%m/%d/"
+         write_path_template = assets_path() + f"{self.parent.assets_name}/%Y/%m/%d/"
          write_path = datetime.now().strftime(write_path_template)
          self.hdf5_file_path.put(write_path)
 
@@ -159,6 +159,16 @@ class TimePixDetector(SingleTriggerV33, AreaDetector):
     ts2 = Cpt(TimeSeriesPlugin_V34, "Stats2:TS:")
     ts3 = Cpt(TimeSeriesPlugin_V34, "Stats3:TS:")
     ts4 = Cpt(TimeSeriesPlugin_V34, "Stats4:TS:")
+
+    def __init__(self, *args, **kwargs):
+        self.assets_name = kwargs.pop("assets_name", "timepix")
+        super().__init__(*args, **kwargs)
+
+        for j in range(1, 5):
+            stat = getattr(self, f'stats{j}')
+            stat.kind = 'normal'
+            stat.total.kind = 'hinted'
+            stat.ts_total.kind = 'normal'
     
     # def stage(self):
     #     self.hdf5_create_directory.set(-4).wait()
@@ -191,15 +201,13 @@ class TimePixDetector(SingleTriggerV33, AreaDetector):
         yield from self.set_num_images(num_frames)      
 
 
-tpx3_1 = TimePixDetector("XF:11ID1-ES{TPX:1}", name="tpx3_1")
-print("Reloaded tpx3!")
-
-for j in range(1, 5):
-    stat = getattr(tpx3_1, f'stats{j}')
-    stat.kind = 'normal'
-    stat.total.kind = 'hinted'
-    stat.ts_total.kind = 'normal'
-
-    
+tpx3_1 = TimePixDetector("XF:11ID1-ES{TPX:1}", name="tpx3_1", assets_name="timepix-1")
+print("Reloaded tpx3_1!")
 for j in [1, 2, 3, 4]:
     getattr(tpx3_1, f'stats{j}').nd_array_port.set(f'ROI{j}')
+
+
+tpx3_2 = TimePixDetector("XF:11ID1-ES{TPX:2}", name="tpx3_2", assets_name="timepix-2")
+print("Reloaded tpx3_2!")
+for j in [1, 2, 3, 4]:
+    getattr(tpx3_2, f'stats{j}').nd_array_port.set(f'ROI{j}')
