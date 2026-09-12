@@ -49,6 +49,8 @@ def move_E(energy, gap=[], xtal="Si111cryo", gapmode="auto", harm=5, gap_offset=
 	to-do: need PV that reflects crystal selection -> new default: xtal='current' -> using whatever xtal is currently in the beam
 	to-do: with PV above, change xtal if selected xtal is not the currently inserted one
 	gap_offset: known offset between actual gap and ID lookup table, May 2024: gap_offset=-25
+	
+	NOTE: Do not do this with the XBPM feedback on.  This function now turns if off.
 	"""
 	if type(energy) in [float,int]:
 		energy=[energy]
@@ -62,8 +64,10 @@ def move_E(energy, gap=[], xtal="Si111cryo", gapmode="auto", harm=5, gap_offset=
 		gap=xf.get_gap(energy,harmonic=harm)[0]+gap_offset   # changed this line after ensuring that energy is a list...
 		print('using calculated gap value from xfuncs!')
 	print('moving ivu_gap to '+str(gap)[:6]+'mm   and dcm.b to '+str(th_B)[:6]+'deg')
+	RE( bps.wait( xbpm.feedback_enable.off() ) )
 	RE(mov(ivu_gap,gap,dcm.b,th_B))
 	print('Done! New X-ray energy is '+ str(dcm.en.user_readback.value/1000)+'keV')
+	print('\tWARNING: Diamond XBPM feedback is off. Turn on in script if needed.')
 
 
 
@@ -74,7 +78,9 @@ def E_scan(energy, gap=[], xtal="Si111cryo", gapmode="auto",harm=5, det=elm.sum_
 	energy: X-ray energy in [keV] & xtal define the Bragg angles used in the scan via xf.get_Bragg(); NOTE: energy must be a LIST!!
 	gap: manually entered list of gap values with gapmode="manual" OR calculated from xf.get_gap(energy, harm, default id map) with gapmode="auto"
 	to-do: allow detector selection from 'detselect()'
-	by LW June 2016
+	by LW June 2016	
+
+	NOTE: Do not do this with the XBPM feedback on.  This function now turns if off.
 	"""
 	from cycler import cycler
 	#from bluesky import PlanND
@@ -92,8 +98,9 @@ def E_scan(energy, gap=[], xtal="Si111cryo", gapmode="auto",harm=5, det=elm.sum_
 	#plan = PlanND([det],inner)
 	plan = scan_nd([det],inner)
 	#RE(plan, [LiveTable([dcm.b,ivu_gap,det]),LivePlot(x='dcm_b',y=det.name,fig = plt.figure())])
+	RE( bps.wait( xbpm.feedback_enable.off() ) )
 	RE(plan, [LiveTable([dcm.b,ivu_gap,det]),LivePlot(x='dcm_b',y=det.name,fig = plt.figure())])
-
+	print('\tWARNING: Diamond XBPM feedback is off. Turn on in script if needed.')
 
 def match_IVU_energy(harm=7,xtal='Si111cryo'):
 	"""
@@ -113,6 +120,8 @@ def Energy_scan(energy, gap=[], xtal="Si111cryo", gapmode="auto",harm=5, det=[ei
 	gap: manually entered list of gap values with gapmode="manual" OR calculated from xf.get_gap(energy, harm, default id map) with gapmode="auto"
 	to-do: allow detector selection from 'detselect()'
 	by LW June 2016
+		
+	NOTE: Do not do this with the XBPM feedback on.  This function now turns if off.
 	"""
 	from cycler import cycler
 	#from bluesky import PlanND
@@ -130,9 +139,10 @@ def Energy_scan(energy, gap=[], xtal="Si111cryo", gapmode="auto",harm=5, det=[ei
 	inner = cycler(dcm.b,th_B)+cycler(ivu_gap,gap)
 	#plan = PlanND([det],inner)
 	plan = scan_nd(det,inner)
+	RE( bps.wait( xbpm.feedback_enable.off() ) )
 	#RE(plan, [LiveTable([dcm.b,ivu_gap,det]),LivePlot(x='dcm_b',y=det.name,fig = plt.figure())])
 	RE(plan)
-
+	print('\tWARNING: Diamond XBPM feedback is off. Turn on in script if needed.')
 
 def Energy_scan_debug(energy, gap=[], xtal="Si111cryo", gapmode="auto",harm=5, det=[eiger1m_single]):
 	"""
